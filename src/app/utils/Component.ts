@@ -23,7 +23,7 @@ export class Component {
     }
   }
 
-  private appendChildren(children: Component[]): void {
+  appendChildren(children: Component[]): void {
     children.forEach(child => {
       this.node.append(child.getNode());
       this.allChildren.push(child);
@@ -64,5 +64,13 @@ export class Component {
       child.destroy();
     });
     this.allChildren = [];
+  }
+
+  addListener(eventName: string, callback: EventListener) {
+    this.node.addEventListener(eventName, callback);
+  }
+
+  deleteListener(eventName: string, callback: EventListener) {
+    this.node.removeEventListener(eventName, callback);
   }
 }
