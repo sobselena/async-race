@@ -5,4 +5,9 @@ export class MainView extends Component {
   constructor() {
     super({ tag: 'main', classes: ['main'] });
   }
+
+  setContent(content: Component) {
+    this.deleteChildren();
+    this.appendChildren([content]);
+  }
 }

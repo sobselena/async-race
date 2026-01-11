@@ -3,19 +3,26 @@ import './link.scss';
 
 interface LinkProperties {
   classes: string[];
-  text?: string;
-  href?: string;
+  text: string;
 }
 export class LinkView extends Component {
-  constructor({ classes, text, href }: LinkProperties) {
+  private links: LinkView[];
+
+  constructor({ classes, text }: LinkProperties, links: LinkView[]) {
     super({ tag: 'a', classes, text });
 
-    if (href) {
-      this.setHref(href);
-    }
+    this.links = links;
   }
 
-  setHref(href: string): void {
-    this.setAttribute('href', href);
+  setActive(activeClass: string) {
+    this.links.forEach(link => {
+      link.setDisabled(activeClass);
+    });
+
+    this.getNode().classList.add(activeClass);
+  }
+
+  setDisabled(activeClass: string) {
+    this.getNode().classList.remove(activeClass);
   }
 }

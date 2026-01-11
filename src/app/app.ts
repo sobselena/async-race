@@ -7,8 +7,8 @@ export class App {
   private main: MainView;
 
   constructor() {
-    this.header = new HeaderView();
     this.main = new MainView();
+    this.header = new HeaderView(this.main);
   }
 
   render(root: HTMLElement) {
