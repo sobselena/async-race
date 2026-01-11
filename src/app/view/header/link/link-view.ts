@@ -6,9 +6,9 @@ interface LinkProperties {
   text: string;
 }
 export class LinkView extends Component {
-  private links: LinkView[];
+  private links: Map<string, LinkView>;
 
-  constructor({ classes, text }: LinkProperties, links: LinkView[]) {
+  constructor({ classes, text }: LinkProperties, links: Map<string, LinkView>) {
     super({ tag: 'a', classes, text });
 
     this.links = links;

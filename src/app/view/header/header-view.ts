@@ -1,7 +1,6 @@
+import { NamePages } from '../../router/pages';
+import type { Router } from '../../router/router';
 import { Component } from '../../utils/Component';
-import { GarageView } from '../main/garage/garage-view';
-import type { MainView } from '../main/main-view';
-import { WinnersView } from '../main/winners/winners-view';
 import './header.scss';
 import { LinkView } from './link/link-view';
 
@@ -10,76 +9,47 @@ export interface Page {
   callback: () => void;
 }
 
-const NamePages: Record<string, string> = {
-  GARAGE: 'garage',
-  WINNERS: 'winners',
-};
-
-const START_PAGE_INDEX: number = 0;
-
 export class HeaderView extends Component {
-  private headerLinks: LinkView[] = [];
+  private headerLinks: Map<string, LinkView> = new Map();
 
-  constructor(mainView: MainView) {
+  constructor(router: Router) {
     super({ tag: 'header', classes: ['header'] });
-    this.createHeader(mainView);
+    this.createHeader(router);
   }
 
-  createHeader(mainView: MainView): void {
+  createHeader(router: Router): void {
     const h1El = new Component({ tag: 'h1', text: 'Async Race' });
     const navEl = new Component({ tag: 'nav', classes: ['header__nav'] });
 
-    const pages = this.getPages(mainView);
-    pages.forEach((page, index) => {
-      const linkEl = new LinkView({ classes: ['header__link'], text: page.name }, this.headerLinks);
+    Object.values(NamePages).forEach(pageName => {
+      const linkParams = {
+        name: pageName,
+        callback: () => router.navigate(pageName),
+      };
+
+      const linkEl = new LinkView(
+        { classes: ['header__link'], text: linkParams.name },
+        this.headerLinks
+      );
+
       linkEl.addListener('click', () => {
-        this.setHeaderActive(page, linkEl);
+        linkParams.callback();
+        this.setSelectedItem(pageName);
       });
 
       navEl.appendChildren([linkEl]);
 
-      if (index === START_PAGE_INDEX) {
-        this.setHeaderActive(page, linkEl);
-      }
-
-      this.headerLinks.push(linkEl);
+      this.headerLinks.set(pageName, linkEl);
     });
 
     this.appendChildren([h1El, navEl]);
   }
 
-  setHeaderActive(page: Page, linkEl: LinkView) {
-    page.callback();
-    linkEl.setActive('header__link_active');
-  }
+  setSelectedItem(pageName: string) {
+    const linkComponent = this.headerLinks.get(pageName);
 
-  getPages(mainView: MainView): Page[] {
-    const garageView: GarageView = new GarageView({
-      tag: 'div',
-      classes: ['garage'],
-      text: 'Garage',
-    });
-    const winnerView: WinnersView = new WinnersView({
-      tag: 'div',
-      classes: ['garage'],
-      text: 'Winners',
-    });
-
-    const pages: Page[] = [
-      {
-        name: NamePages.GARAGE,
-        callback: () => {
-          mainView.setContent(garageView);
-        },
-      },
-      {
-        name: NamePages.WINNERS,
-        callback: () => {
-          mainView.setContent(winnerView);
-        },
-      },
-    ];
-
-    return pages;
+    if (linkComponent instanceof LinkView) {
+      linkComponent.setActive('header__link_active');
+    }
   }
 }
