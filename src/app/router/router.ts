@@ -10,6 +10,13 @@ export class Router {
 
   constructor(routes: Routes[]) {
     this.routes = routes;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const path = this.getUrl();
+      this.navigate(path);
+    });
+    window.addEventListener('popstate', this.urlChangeHandler.bind(this));
+    window.addEventListener('hashchange', this.urlChangeHandler.bind(this));
   }
 
   navigate(url: string) {
@@ -28,17 +35,28 @@ export class Router {
     return route?.callback();
   }
 
-  parseUrl(url: string) {
-    const result: {
-      path: string;
-      resource: string;
-    } = {
-      path: '',
-      resource: '',
+  parseUrl(url: string): {
+    path: string;
+    resource: string;
+  } {
+    const [path = '', resource = ''] = url.split('/');
+    return {
+      path,
+      resource,
     };
+  }
 
-    const path = url.split('/');
-    [result.path = '', result.resource = ''] = path;
-    return result;
+  urlChangeHandler() {
+    const url = this.getUrl();
+    console.log(url);
+    this.navigate(url);
+  }
+
+  getUrl() {
+    if (window.location.hash) {
+      return window.location.hash.slice(1);
+    }
+
+    return window.location.pathname.slice(1);
   }
 }
