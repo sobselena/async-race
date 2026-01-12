@@ -51,6 +51,7 @@ export class App {
   }
 
   setContent(viewComponent: Component, name: string) {
+    window.history.pushState({ page: `${name}` }, '', `/${name}`);
     this.main.setContent(viewComponent);
     this.header.setSelectedItem(name);
   }
