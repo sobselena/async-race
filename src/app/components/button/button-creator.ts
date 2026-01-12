@@ -6,7 +6,7 @@ interface ButtonProperties {
   text?: string;
   onClick?: EventListener;
 }
-export class ButtonView extends Component {
+export class Button extends Component {
   private onClick?: EventListener;
 
   constructor({ classes, text, onClick }: ButtonProperties) {

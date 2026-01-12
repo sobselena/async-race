@@ -26,25 +26,23 @@ export class App {
   }
 
   createRoutes(): Routes[] {
-    const garageView: GarageView = new GarageView();
-    const winnersView: WinnersView = new WinnersView();
     return [
       {
         path: '',
         callback: () => {
-          this.setContent(garageView, NamePages.GARAGE);
+          this.setContent(new GarageView(), NamePages.GARAGE);
         },
       },
       {
         path: `${NamePages.GARAGE}`,
         callback: () => {
-          this.setContent(garageView, NamePages.GARAGE);
+          this.setContent(new GarageView(), NamePages.GARAGE);
         },
       },
       {
         path: `${NamePages.WINNERS}`,
         callback: () => {
-          this.setContent(winnersView, NamePages.WINNERS);
+          this.setContent(new WinnersView(), NamePages.WINNERS);
         },
       },
     ];
