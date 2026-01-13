@@ -1,20 +1,31 @@
+import type { Car } from '../../../api/garageAPI';
 import { Button } from '../../../components/button/button-creator';
 import { Component } from '../../../utils/Component';
 import './cars.scss';
 
+export interface CarEvents {
+  DELETE: (id: number) => Promise<void>;
+  EDIT: () => void;
+  START: () => void;
+  STOP: () => void;
+}
 interface CarProperties {
   classes: string[];
+  events: CarEvents;
 }
 export class CarsView extends Component {
-  constructor({ classes }: CarProperties) {
+  private events: CarEvents;
+
+  constructor({ classes, events }: CarProperties) {
     super({ tag: 'div', classes });
+    this.events = events;
   }
 
-  createCar(name: string, color: string) {
+  createCar({ name, color, id }: Car) {
     const car = new Component({ tag: 'div', classes: ['car'] });
 
     car.appendChildren([
-      this.createCarStateWrapper(name),
+      this.createCarStateWrapper(name, id),
       this.createCarBody(color),
       this.createTrackRoad(),
     ]);
@@ -22,12 +33,15 @@ export class CarsView extends Component {
     super.appendChildren([car]);
   }
 
-  createCarStateWrapper(name: string): Component {
+  createCarStateWrapper(name: string, id: number): Component {
     const carStateWrapper = new Component({ tag: 'div', classes: ['car__state-wrapper'] });
     const editButton = new Button({ classes: ['car__button', 'car__button_edit'], text: 'edit' });
     const deleteButton = new Button({
       classes: ['car__button', 'car__button_delete'],
       text: 'delete',
+      onClick: () => {
+        this.events.DELETE(id).catch(console.error);
+      },
     });
     const carName = new Component({ tag: 'h3', classes: ['car__name'], text: `${name}` });
     const carState = new Component({ tag: 'div', classes: ['car__state'], text: 'in garage' });

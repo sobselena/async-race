@@ -1,10 +1,10 @@
 const BASIC_URL = 'http://127.0.0.1:3000';
-interface Car {
+export interface Car {
   name: string;
   color: string;
   id: number;
 }
-interface Engine {
+export interface Engine {
   velocity: number;
   distance: number;
 }
