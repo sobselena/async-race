@@ -18,26 +18,26 @@ export class PaginationView extends Component {
 
   private maxPageEl: Component;
 
+  private paginationProperties: PaginationProperties;
+
   constructor(paginationProperties: PaginationProperties) {
     super({ tag: 'div', classes: ['pagination'] });
+    this.paginationProperties = paginationProperties;
+
     this.limit = paginationProperties.limit;
     this.totalCount = paginationProperties.totalCount;
 
     this.pageNumEl = new Component({ tag: 'span', text: `${this.currentPage}` });
 
     this.maxPageEl = new Component({ tag: 'span', text: `${this.getMaxPage()}` });
-    this.createPagination(paginationProperties);
+    this.createPagination();
   }
 
-  createPagination(paginationProperties: PaginationProperties) {
+  createPagination() {
     const prevButton = new Button({
       classes: ['pagination__button', 'pagination__button_prev'],
       text: 'Prev',
-      onClick: () => {
-        if (this.currentPage === 1) return;
-        this.currentPage -= 1;
-        this.updateLayout(this.pageNumEl, paginationProperties);
-      },
+      onClick: this.decreaseCurrentPage.bind(this),
     });
     const currentPageEl = new Component(
       {
@@ -52,14 +52,22 @@ export class PaginationView extends Component {
     const nextButton = new Button({
       classes: ['pagination__button', 'pagination__button_next'],
       text: 'Next',
-      onClick: () => {
-        if (this.currentPage === this.getMaxPage()) return;
-        this.currentPage += 1;
-        this.updateLayout(this.pageNumEl, paginationProperties);
-      },
+      onClick: this.increaseCurrentPage.bind(this),
     });
 
     super.appendChildren([prevButton, currentPageEl, nextButton]);
+  }
+
+  decreaseCurrentPage() {
+    if (this.currentPage === 1) return;
+    this.currentPage -= 1;
+    this.updateLayout(this.pageNumEl, this.paginationProperties);
+  }
+
+  increaseCurrentPage() {
+    if (this.currentPage === this.getMaxPage()) return;
+    this.currentPage += 1;
+    this.updateLayout(this.pageNumEl, this.paginationProperties);
   }
 
   updateLayout(pageNum: Component, paginationProperties: PaginationProperties) {
@@ -73,7 +81,10 @@ export class PaginationView extends Component {
 
   updateTotalCount(newTotalCount: number) {
     this.totalCount = newTotalCount;
-    this.maxPageEl.setText(`${this.getMaxPage()} `);
+    const newMaxPage = `${this.getMaxPage()}`;
+    if (this.maxPageEl.getNode().textContent !== newMaxPage) {
+      this.maxPageEl.setText(newMaxPage);
+    }
   }
 
   getMaxPage(): number {

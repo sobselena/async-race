@@ -17,6 +17,8 @@ export class GarageAPI {
 
   private readonly engineURL = `${BASIC_URL}/engine`;
 
+  private totalCount: number = 0;
+
   constructor() {}
 
   async sendRequest<T>(url: string, requestOpions?: RequestInit): Promise<T> {
@@ -36,6 +38,7 @@ export class GarageAPI {
       if (!response.ok) throw new Error(`Request Error: ${response.status}`);
       const totalCount = Number(response.headers.get('X-Total-Count')) || 0;
       const data = (await response.json()) as Car[];
+      this.totalCount = totalCount;
       return { totalCount, data };
     } catch (error) {
       console.error(error);
@@ -52,6 +55,7 @@ export class GarageAPI {
       name: carParams.name,
       color: carParams.color,
     });
+    this.totalCount += 1;
     return this.sendRequest<Car>(`${this.garageURL}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -60,6 +64,7 @@ export class GarageAPI {
   }
 
   async deleteCar(id: number): Promise<void> {
+    this.totalCount -= 1;
     await fetch(`${this.garageURL}/${id}`, {
       method: 'DELETE',
     });
@@ -103,5 +108,9 @@ export class GarageAPI {
       console.error(error);
       throw error;
     }
+  }
+
+  getTotalCount(): number {
+    return this.totalCount;
   }
 }

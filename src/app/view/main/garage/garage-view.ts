@@ -1,4 +1,4 @@
-import { GarageAPI, type CarsResponse } from '../../../api/garageAPI';
+import { GarageAPI, type Car, type CarsResponse } from '../../../api/garageAPI';
 import { Button } from '../../../components/button/button-creator';
 import { Form } from '../../../components/form/form-creator';
 import { InputField } from '../../../components/input-field/input-field-creator';
@@ -19,7 +19,7 @@ export class GarageView extends Component {
 
   private pagination: PaginationView = new PaginationView({
     limit: GARAGE_PAGINATION_LIMIT,
-    totalCount: this.carsData?.totalCount || 0,
+    totalCount: this.garageAPI.getTotalCount(),
     onPageChange: () => {
       this.updateGarage().catch(console.error);
     },
@@ -111,25 +111,32 @@ export class GarageView extends Component {
   }
 
   async createCar(name: string, color: string) {
-    await this.garageAPI.createCar({ name, color });
-    await this.updateCurrentPage();
+    const newCarData = await this.garageAPI.createCar({ name, color });
+    this.updateCurrentPage(newCarData);
+    this.pagination.updateTotalCount(this.garageAPI.getTotalCount());
   }
 
   async deleteCar(id: number) {
+    const isLastPage = this.isLastPage();
     await this.garageAPI.deleteCar(id);
     await this.updateGarage();
+    if (this.garageAPI.getTotalCount() % GARAGE_PAGINATION_LIMIT === 0 && isLastPage) {
+      this.pagination.decreaseCurrentPage();
+    }
   }
 
-  async updateCurrentPage() {
-    await this.loadCars();
+  updateCurrentPage(newCarData: Car) {
     this.updateCarsCount();
-    if (
-      (Math.ceil((this.carsData?.totalCount || 0) / GARAGE_PAGINATION_LIMIT) || 1) ===
-      this.pagination.getCurrentPage()
-    ) {
-      console.log('render cars');
-      this.renderCars();
+    if (this.isLastPage()) {
+      this.garageCars.createCar(newCarData);
     }
+  }
+
+  isLastPage(): boolean {
+    return (
+      (Math.ceil(this.garageAPI.getTotalCount() / GARAGE_PAGINATION_LIMIT) || 1) ===
+      this.pagination.getCurrentPage()
+    );
   }
 
   async loadCars() {
@@ -138,7 +145,7 @@ export class GarageView extends Component {
       GARAGE_PAGINATION_LIMIT
     );
     this.carsData = carsData;
-    this.pagination.updateTotalCount(this.carsData?.totalCount || 0);
+    this.pagination.updateTotalCount(this.garageAPI.getTotalCount());
   }
 
   renderCars() {
@@ -150,7 +157,7 @@ export class GarageView extends Component {
   }
 
   updateCarsCount() {
-    this.carsCount.setText(String(this.carsData?.totalCount || 0));
+    this.carsCount.setText(`${this.garageAPI.getTotalCount()}`);
   }
 
   createEvents(): CarEvents {
