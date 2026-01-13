@@ -7,18 +7,23 @@ import { CarsView } from '../car/cars-view';
 import { PaginationView } from '../pagination/pagination-view';
 import './garage.scss';
 
+const GARAGE_PAGINATION_LIMIT = 7;
 export class GarageView extends Component {
-  private garageAPI: GarageAPI = new GarageAPI();
-
-  private currentPage: number = 1;
-
-  private readonly limit: number = 7;
-
   private carsData: CarsResponse | null = null;
 
   private garageCars: CarsView = this.createGarageCars();
 
   private carsCount: Component = this.createCarsCount();
+
+  private garageAPI: GarageAPI = new GarageAPI();
+
+  private pagination: PaginationView = new PaginationView({
+    limit: GARAGE_PAGINATION_LIMIT,
+    totalCount: this.carsData?.totalCount || 0,
+    onPageChange: () => {
+      this.updateGarage().catch(console.error);
+    },
+  });
 
   constructor() {
     super({ tag: 'div', classes: ['garage'] });
@@ -59,8 +64,8 @@ export class GarageView extends Component {
       },
       this.carsCount
     );
-    const paginationEl = new PaginationView();
-    garageInfoWrapper.appendChildren([garageTitle, this.createButtonsWrapper(), paginationEl]);
+
+    garageInfoWrapper.appendChildren([garageTitle, this.createButtonsWrapper(), this.pagination]);
 
     return garageInfoWrapper;
   }
@@ -96,8 +101,12 @@ export class GarageView extends Component {
   }
 
   async loadCars() {
-    const carsData = await this.garageAPI.getCars(this.currentPage, this.limit);
+    const carsData = await this.garageAPI.getCars(
+      this.pagination.getCurrentPage(),
+      GARAGE_PAGINATION_LIMIT
+    );
     this.carsData = carsData;
+    this.pagination.updateTotalCount(this.carsData?.totalCount || 0);
   }
 
   renderCars() {
