@@ -16,7 +16,7 @@ export class PaginationView extends Component {
     });
     const currentPageEl = new Component({
       tag: 'div',
-      classes: ['paggination__current-page'],
+      classes: ['pagination__current-page'],
       text: 'Page 1',
     });
     const nextButton = new Button({

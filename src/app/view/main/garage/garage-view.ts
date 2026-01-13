@@ -1,4 +1,4 @@
-import { GarageAPI } from '../../../api/garageAPI';
+import { GarageAPI, type CarsResponse } from '../../../api/garageAPI';
 import { Button } from '../../../components/button/button-creator';
 import { Form } from '../../../components/form/form-creator';
 import { InputField } from '../../../components/input-field/input-field-creator';
@@ -14,9 +14,11 @@ export class GarageView extends Component {
 
   private readonly limit: number = 7;
 
-  private garageCars: CarsView = new CarsView({ classes: ['garage__cars'] });
+  private carsData: CarsResponse | null = null;
 
-  private carsCount: Component = new Component({ tag: 'span', classes: ['garage__cars-count'] });
+  private garageCars: CarsView = this.createGarageCars();
+
+  private carsCount: Component = this.createCarsCount();
 
   constructor() {
     super({ tag: 'div', classes: ['garage'] });
@@ -24,9 +26,27 @@ export class GarageView extends Component {
     this.configureView().catch(console.error);
   }
 
-  async configureView() {
+  async configureView(): Promise<void> {
     super.appendChildren([this.createInfoWrapper(), this.garageCars]);
+    await this.updateGarage();
+  }
+
+  async updateGarage(): Promise<void> {
     await this.loadCars();
+    this.renderCars();
+    this.updateCarsCount();
+  }
+
+  createGarageCars(): CarsView {
+    return new CarsView({ classes: ['garage__cars'] });
+  }
+
+  createCarsCount(): Component {
+    return new Component({
+      tag: 'span',
+      classes: ['garage__cars-count'],
+      text: '0',
+    });
   }
 
   createInfoWrapper(): Component {
@@ -76,12 +96,19 @@ export class GarageView extends Component {
   }
 
   async loadCars() {
-    this.garageCars.deleteChildren();
     const carsData = await this.garageAPI.getCars(this.currentPage, this.limit);
-    this.carsCount.getNode().textContent = `(${carsData.totalCount})`;
-    carsData.data.forEach(carData => {
-      const { name, color } = carData;
-      this.garageCars.createCar(name, color);
+    this.carsData = carsData;
+  }
+
+  renderCars() {
+    this.garageCars.deleteChildren();
+    if (!this.carsData) return;
+    this.carsData.data.forEach(carData => {
+      this.garageCars.createCar(carData.name, carData.color);
     });
+  }
+
+  updateCarsCount() {
+    this.carsCount.setText(String(this.carsData?.totalCount || 0));
   }
 }

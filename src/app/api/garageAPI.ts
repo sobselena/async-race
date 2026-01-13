@@ -8,6 +8,10 @@ interface Engine {
   velocity: number;
   distance: number;
 }
+export interface CarsResponse {
+  data: Car[];
+  totalCount: number;
+}
 export class GarageAPI {
   private readonly garageURL = `${BASIC_URL}/garage`;
 
@@ -26,7 +30,7 @@ export class GarageAPI {
     }
   }
 
-  async getCars(page: number, limit: number): Promise<{ totalCount: number; data: Car[] }> {
+  async getCars(page: number, limit: number): Promise<CarsResponse> {
     try {
       const response = await fetch(`${this.garageURL}?_page=${page}&_limit=${limit}`);
       if (!response.ok) throw new Error(`Request Error: ${response.status}`);
