@@ -1,28 +1,44 @@
+import { GarageAPI } from '../../../api/garageAPI';
 import { Button } from '../../../components/button/button-creator';
 import { Form } from '../../../components/form/form-creator';
 import { InputField } from '../../../components/input-field/input-field-creator';
 import { Component } from '../../../utils/Component';
+import { CarsView } from '../car/cars-view';
 import { PaginationView } from '../pagination/pagination-view';
 import './garage.scss';
 
 export class GarageView extends Component {
+  private garageAPI: GarageAPI = new GarageAPI();
+
+  private currentPage: number = 1;
+
+  private readonly limit: number = 7;
+
+  private garageCars: CarsView = new CarsView({ classes: ['garage__cars'] });
+
+  private carsCount: Component = new Component({ tag: 'span', classes: ['garage__cars-count'] });
+
   constructor() {
     super({ tag: 'div', classes: ['garage'] });
 
-    this.configureView();
+    this.configureView().catch(console.error);
   }
 
-  configureView() {
-    super.appendChildren([this.createInfoWrapper(), this.createFormWrapper()]);
+  async configureView() {
+    super.appendChildren([this.createInfoWrapper(), this.garageCars]);
+    await this.loadCars();
   }
 
   createInfoWrapper(): Component {
     const garageInfoWrapper = new Component({ tag: 'div', classes: ['garage__info-wrapper'] });
-    const garageTitle = new Component({
-      tag: 'h2',
-      classes: ['garage__title'],
-      text: 'Garage (0)',
-    });
+    const garageTitle = new Component(
+      {
+        tag: 'h2',
+        classes: ['garage__title'],
+        text: 'Garage ',
+      },
+      this.carsCount
+    );
     const paginationEl = new PaginationView();
     garageInfoWrapper.appendChildren([garageTitle, this.createButtonsWrapper(), paginationEl]);
 
@@ -57,5 +73,15 @@ export class GarageView extends Component {
     formEl.appendChildren([textInput, colorInput, submitButton]);
 
     return formEl;
+  }
+
+  async loadCars() {
+    this.garageCars.deleteChildren();
+    const carsData = await this.garageAPI.getCars(this.currentPage, this.limit);
+    this.carsCount.getNode().textContent = `(${carsData.totalCount})`;
+    carsData.data.forEach(carData => {
+      const { name, color } = carData;
+      this.garageCars.createCar(name, color);
+    });
   }
 }

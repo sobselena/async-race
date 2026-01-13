@@ -8,7 +8,7 @@ interface Engine {
   velocity: number;
   distance: number;
 }
-export class garageAPI {
+export class GarageAPI {
   private readonly garageURL = `${BASIC_URL}/garage`;
 
   private readonly engineURL = `${BASIC_URL}/engine`;
