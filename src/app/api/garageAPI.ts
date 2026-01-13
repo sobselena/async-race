@@ -47,7 +47,7 @@ export class GarageAPI {
     return this.sendRequest<Car>(`${this.garageURL}/${id}`);
   }
 
-  createCar(carParams: Car) {
+  createCar(carParams: Omit<Car, 'id'>) {
     const body = JSON.stringify({
       name: carParams.name,
       color: carParams.color,

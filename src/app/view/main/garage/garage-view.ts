@@ -32,7 +32,7 @@ export class GarageView extends Component {
   }
 
   async configureView(): Promise<void> {
-    super.appendChildren([this.createInfoWrapper(), this.garageCars]);
+    super.appendChildren([this.createInfoWrapper(), this.createFormWrapper(), this.garageCars]);
     await this.updateGarage();
   }
 
@@ -91,13 +91,36 @@ export class GarageView extends Component {
   }
 
   createFormWrapper(): Form {
-    const formEl = new Form({ classes: ['garage__form', 'garage__form_creator'] });
     const textInput = new InputField({ classes: ['garage__text-input'], type: 'text' });
     const colorInput = new InputField({ classes: ['garage__color-input'], type: 'color' });
     const submitButton = new Button({ classes: ['garage__submit-button'], text: 'Create' });
+    const formEl = new Form({
+      classes: ['garage__form', 'garage__form_creator'],
+      onSubmit: (event: Event) => {
+        event.preventDefault();
+        const carName = textInput.getValue();
+        if (!carName) return;
+        const carColor = colorInput.getValue();
+        textInput.setDeffaultValue();
+        this.createCar(carName, carColor).catch(console.error);
+      },
+    });
     formEl.appendChildren([textInput, colorInput, submitButton]);
 
     return formEl;
+  }
+
+  async createCar(name: string, color: string) {
+    await this.garageAPI.createCar({ name, color });
+    await this.loadCars();
+    this.updateCarsCount();
+    if (
+      (Math.ceil((this.carsData?.totalCount || 0) / GARAGE_PAGINATION_LIMIT) || 1) ===
+      this.pagination.getCurrentPage()
+    ) {
+      console.log('render cars');
+      this.renderCars();
+    }
   }
 
   async loadCars() {

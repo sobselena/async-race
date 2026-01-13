@@ -24,8 +24,11 @@ export class CarsView extends Component {
 
   createCarStateWrapper(name: string): Component {
     const carStateWrapper = new Component({ tag: 'div', classes: ['car__state-wrapper'] });
-    const editButton = new Button({ classes: ['car__button', 'car__button_edit'] });
-    const deleteButton = new Button({ classes: ['car__button', 'car__button_delete'] });
+    const editButton = new Button({ classes: ['car__button', 'car__button_edit'], text: 'edit' });
+    const deleteButton = new Button({
+      classes: ['car__button', 'car__button_delete'],
+      text: 'delete',
+    });
     const carName = new Component({ tag: 'h3', classes: ['car__name'], text: `${name}` });
     const carState = new Component({ tag: 'div', classes: ['car__state'], text: 'in garage' });
 

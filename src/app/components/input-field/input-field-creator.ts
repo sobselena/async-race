@@ -21,6 +21,14 @@ export class InputField extends Component {
     }
   }
 
+  getValue(): string {
+    return (this.getNode() as HTMLInputElement).value;
+  }
+
+  setDeffaultValue(): void {
+    (this.getNode() as HTMLInputElement).value = '';
+  }
+
   setPlaceholder(placeholder: string) {
     this.setAttribute('placeholder', placeholder);
   }
