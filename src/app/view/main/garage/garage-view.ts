@@ -34,6 +34,7 @@ export class GarageView extends Component {
           this.garageCars.changeCarName(id, name);
           this.garageCars.changeCarColor(id, color);
           this.garageCars.resetEditId();
+          this.updateForm.setDefaultValues();
         })
         .catch(console.error);
     },
@@ -139,6 +140,12 @@ export class GarageView extends Component {
 
   async deleteCar(id: number) {
     const isLastPage = this.isLastPage();
+    if (id === this.garageCars.getEditId()) {
+      this.garageCars.resetEditId();
+      this.updateForm.toggleDisabled(true);
+      this.updateForm.setDefaultValues();
+    }
+    console.log(id, this.garageCars.getEditId());
     await this.garageAPI.deleteCar(id);
     await this.updateGarage();
     if (this.garageAPI.getTotalCount() % GARAGE_PAGINATION_LIMIT === 0 && isLastPage) {

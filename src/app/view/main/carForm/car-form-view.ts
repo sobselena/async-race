@@ -11,6 +11,8 @@ export interface CarFormProperties {
   submitBtnText: string;
 }
 export class CarFormView extends Component {
+  private readonly defaultColor = `#000000`;
+
   private textInput: InputField = new InputField({ classes: ['garage__text-input'], type: 'text' });
 
   private colorInput: InputField = new InputField({
@@ -56,5 +58,10 @@ export class CarFormView extends Component {
     console.log(carParams);
     (this.textInput.getNode() as HTMLInputElement).value = carParams.name;
     (this.colorInput.getNode() as HTMLInputElement).value = carParams.color;
+  }
+
+  setDefaultValues() {
+    (this.textInput.getNode() as HTMLInputElement).value = '';
+    (this.colorInput.getNode() as HTMLInputElement).value = `${this.defaultColor}`;
   }
 }
