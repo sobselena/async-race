@@ -70,14 +70,8 @@ export class GarageAPI {
     });
   }
 
-  async updateCar(
-    id: number,
-    updatedCarParams: {
-      name: string;
-      color: string;
-    }
-  ): Promise<void> {
-    const body = JSON.stringify(updatedCarParams);
+  async updateCar({ name, color, id }: Car): Promise<void> {
+    const body = JSON.stringify({ name, color });
     await fetch(`${this.garageURL}/${id}`, {
       method: 'PUT',
       headers: {

@@ -16,6 +16,16 @@ interface CarProperties {
 export class CarsView extends Component {
   private events: CarEvents;
 
+  private editId: number | null = null;
+
+  private carsMap = new Map<
+    number,
+    {
+      name: Component;
+      track: Component;
+    }
+  >();
+
   constructor({ classes, events }: CarProperties) {
     super({ tag: 'div', classes });
     this.events = events;
@@ -24,22 +34,44 @@ export class CarsView extends Component {
   createCar({ name, color, id }: Car) {
     const car = new Component({ tag: 'div', classes: ['car'] });
 
+    const nameComponent = new Component({
+      tag: 'h3',
+      classes: ['car__name'],
+      text: name,
+    });
+
+    const trackComponent = new Component({
+      tag: 'div',
+      classes: ['car__track'],
+      text: color,
+    });
+
+    this.carsMap.set(id, {
+      name: nameComponent,
+      track: trackComponent,
+    });
+
     car.appendChildren([
-      this.createCarStateWrapper(name, id),
-      this.createCarBody(color),
+      this.createCarStateWrapper(id, nameComponent),
+      this.createCarBody(trackComponent),
       this.createTrackRoad(),
     ]);
 
-    super.appendChildren([car]);
+    this.appendChildren([car]);
   }
 
-  createCarStateWrapper(name: string, id: number): Component {
-    const carStateWrapper = new Component({ tag: 'div', classes: ['car__state-wrapper'] });
+  createCarStateWrapper(id: number, carName: Component): Component {
+    const stateWrapper = new Component({ tag: 'div', classes: ['car__state-wrapper'] });
+
     const editButton = new Button({
       classes: ['car__button', 'car__button_edit'],
       text: 'edit',
-      onClick: this.events.EDIT,
+      onClick: () => {
+        this.editId = id;
+        this.events.EDIT();
+      },
     });
+
     const deleteButton = new Button({
       classes: ['car__button', 'car__button_delete'],
       text: 'delete',
@@ -47,16 +79,20 @@ export class CarsView extends Component {
         this.events.DELETE(id).catch(console.error);
       },
     });
-    const carName = new Component({ tag: 'h3', classes: ['car__name'], text: `${name}` });
-    const carState = new Component({ tag: 'div', classes: ['car__state'], text: 'in garage' });
 
-    carStateWrapper.appendChildren([editButton, deleteButton, carName, carState]);
-    return carStateWrapper;
+    const state = new Component({
+      tag: 'div',
+      classes: ['car__state'],
+      text: 'in garage',
+    });
+
+    stateWrapper.appendChildren([editButton, deleteButton, carName, state]);
+    return stateWrapper;
   }
 
-  createCarBody(color: string): Component {
+  createCarBody(track: Component): Component {
     const carBody = new Component({ tag: 'div', classes: ['car__body'] });
-    carBody.appendChildren([this.createControlButtons(), this.createCarTrack(color)]);
+    carBody.appendChildren([this.createControlButtons(), track]);
     return carBody;
   }
 
@@ -68,14 +104,34 @@ export class CarsView extends Component {
     return carControlButtons;
   }
 
-  createCarTrack(color: string): Component {
-    const carTrack = new Component({ tag: 'div', classes: ['car__track'], text: color });
-
-    return carTrack;
-  }
-
   createTrackRoad(): Component {
     const trackRoad = new Component({ tag: 'div', classes: ['car__road'] });
     return trackRoad;
+  }
+
+  getEditId() {
+    return this.editId;
+  }
+
+  changeCarName(id: number, newName: string) {
+    const car = this.carsMap.get(id);
+    if (!car) return;
+
+    car.name.setText(newName);
+  }
+
+  changeCarColor(id: number, newColor: string) {
+    const car = this.carsMap.get(id);
+    if (!car) return;
+
+    car.track.setText(newColor);
+  }
+
+  clearCarsMap() {
+    this.carsMap.clear();
+  }
+
+  resetEditId() {
+    this.editId = null;
   }
 }

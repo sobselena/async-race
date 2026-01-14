@@ -1,10 +1,11 @@
+import type { Car } from '../../../api/garageAPI';
 import { Button } from '../../../components/button/button-creator';
 import { InputField } from '../../../components/input-field/input-field-creator';
 import { Component } from '../../../utils/Component';
 import './car-form.scss';
 
 export interface CarFormProperties {
-  onSubmit: (name: string, color: string) => void;
+  onSubmit: (name: string, color: string, id?: number) => void;
   classes: string[];
   isDisabled?: boolean;
   submitBtnText: string;
@@ -49,5 +50,11 @@ export class CarFormView extends Component {
       this.colorInput.removeAttribute('disabled');
       this.submitButton.removeAttribute('disabled');
     }
+  }
+
+  setCarValues(carParams: Car) {
+    console.log(carParams);
+    (this.textInput.getNode() as HTMLInputElement).value = carParams.name;
+    (this.colorInput.getNode() as HTMLInputElement).value = carParams.color;
   }
 }

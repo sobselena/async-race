@@ -25,8 +25,17 @@ export class GarageView extends Component {
   });
 
   private updateForm: CarFormView = new CarFormView({
-    onSubmit: () => {
+    onSubmit: (name: string, color: string) => {
       this.updateForm.toggleDisabled(true);
+      const id = this.garageCars.getEditId();
+      if (!id) return;
+      this.updateCar({ name, color })
+        .then(() => {
+          this.garageCars.changeCarName(id, name);
+          this.garageCars.changeCarColor(id, color);
+          this.garageCars.resetEditId();
+        })
+        .catch(console.error);
     },
     classes: ['garage__form', 'garage__form_update'],
     isDisabled: true,
@@ -113,6 +122,15 @@ export class GarageView extends Component {
     return formsWrapper;
   }
 
+  async updateCar({ name, color }: Omit<Car, 'id'>) {
+    const id = this.garageCars.getEditId();
+    if (!id) {
+      this.updateForm.toggleDisabled(true);
+      return;
+    }
+    await this.garageAPI.updateCar({ name, color, id });
+  }
+
   async createCar(name: string, color: string) {
     const newCarData = await this.garageAPI.createCar({ name, color });
     this.updateCurrentPage(newCarData);
@@ -153,6 +171,7 @@ export class GarageView extends Component {
 
   renderCars() {
     this.garageCars.deleteChildren();
+    this.garageCars.clearCarsMap();
     if (!this.carsData) return;
     this.carsData.data.forEach(carData => {
       this.garageCars.createCar(carData);
@@ -167,7 +186,18 @@ export class GarageView extends Component {
     return {
       DELETE: (id: number) => this.deleteCar(id),
       EDIT: () => {
+        const id = this.garageCars.getEditId();
+        if (!id) {
+          this.updateForm.toggleDisabled(true);
+          return;
+        }
         this.updateForm.toggleDisabled(false);
+        this.garageAPI
+          .getCar(id)
+          .then(data => {
+            this.updateForm.setCarValues(data);
+          })
+          .catch(console.error);
       },
       START: () => {},
       STOP: () => {},
