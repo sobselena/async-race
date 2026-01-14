@@ -24,6 +24,7 @@ export class CarsView extends Component {
       name: Component;
       carImgWrapper: Component;
       track: Component;
+      stateContainer?: Component;
     }
   >();
 
@@ -85,13 +86,16 @@ export class CarsView extends Component {
       },
     });
 
-    const state = new Component({
+    const stateContainer = new Component({
       tag: 'div',
       classes: ['car__state'],
       text: 'in garage',
     });
-
-    stateWrapper.appendChildren([editButton, deleteButton, carName, state]);
+    const currentCarData = this.carsMap.get(id);
+    if (currentCarData) {
+      this.carsMap.set(id, { ...currentCarData, stateContainer });
+    }
+    stateWrapper.appendChildren([editButton, deleteButton, carName, stateContainer]);
     return stateWrapper;
   }
 
@@ -109,6 +113,7 @@ export class CarsView extends Component {
       onClick: () => {
         this.events.START(id, () => {
           stopButton.removeAttribute('disabled');
+          this.carsMap.get(id)?.stateContainer?.setText('moving');
         });
         startButton.setAttribute('disabled', '');
       },
@@ -140,6 +145,11 @@ export class CarsView extends Component {
     carImgWrapper.style.transition = `transform ${time}s linear`;
     carImgWrapper.getBoundingClientRect();
     carImgWrapper.style.transform = `translateX(${trackWidth - carWidth}px)`;
+    const transitionEndCallback = () => {
+      car.carImgWrapper.deleteListener('transitionend', transitionEndCallback);
+      this.carsMap.get(id)?.stateContainer?.setText('finished');
+    };
+    car.carImgWrapper.addListener('transitionend', transitionEndCallback);
   }
 
   stopCar(id: number) {
@@ -151,6 +161,9 @@ export class CarsView extends Component {
     const currentX = matrix.m41;
     carImgWrapper.style.transition = '';
     carImgWrapper.style.transform = `translateX(${currentX}px)`;
+    if (car.stateContainer?.getNode().textContent !== 'finished') {
+      car.stateContainer?.setText('broken');
+    }
   }
 
   resetCarPosition(id: number) {
@@ -158,7 +171,7 @@ export class CarsView extends Component {
     if (!car) return;
 
     const carImg = car.carImgWrapper.getNode();
-
+    car.stateContainer?.setText('in garage');
     carImg.style.transition = '';
     carImg.style.transform = `translateX(0)`;
   }
