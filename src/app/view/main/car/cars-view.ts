@@ -25,7 +25,7 @@ export class CarsView extends Component {
     const car = new Component({ tag: 'div', classes: ['car'] });
 
     car.appendChildren([
-      this.createCarStateWrapper(car, name, id),
+      this.createCarStateWrapper(name, id),
       this.createCarBody(color),
       this.createTrackRoad(),
     ]);
@@ -33,9 +33,13 @@ export class CarsView extends Component {
     super.appendChildren([car]);
   }
 
-  createCarStateWrapper(car: Component, name: string, id: number): Component {
+  createCarStateWrapper(name: string, id: number): Component {
     const carStateWrapper = new Component({ tag: 'div', classes: ['car__state-wrapper'] });
-    const editButton = new Button({ classes: ['car__button', 'car__button_edit'], text: 'edit' });
+    const editButton = new Button({
+      classes: ['car__button', 'car__button_edit'],
+      text: 'edit',
+      onClick: this.events.EDIT,
+    });
     const deleteButton = new Button({
       classes: ['car__button', 'car__button_delete'],
       text: 'delete',

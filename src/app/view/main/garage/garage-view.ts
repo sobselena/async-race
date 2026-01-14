@@ -1,9 +1,8 @@
 import { GarageAPI, type Car, type CarsResponse } from '../../../api/garageAPI';
 import { Button } from '../../../components/button/button-creator';
-import { Form } from '../../../components/form/form-creator';
-import { InputField } from '../../../components/input-field/input-field-creator';
 import { Component } from '../../../utils/Component';
 import { CarsView, type CarEvents } from '../car/cars-view';
+import { CarFormView } from '../carForm/car-form-view';
 import { PaginationView } from '../pagination/pagination-view';
 import './garage.scss';
 
@@ -25,6 +24,15 @@ export class GarageView extends Component {
     },
   });
 
+  private updateForm: CarFormView = new CarFormView({
+    onSubmit: () => {
+      this.updateForm.toggleDisabled(true);
+    },
+    classes: ['garage__form', 'garage__form_update'],
+    isDisabled: true,
+    submitBtnText: 'Update',
+  });
+
   constructor() {
     super({ tag: 'div', classes: ['garage'] });
 
@@ -32,7 +40,7 @@ export class GarageView extends Component {
   }
 
   async configureView(): Promise<void> {
-    super.appendChildren([this.createInfoWrapper(), this.createFormWrapper(), this.garageCars]);
+    super.appendChildren([this.createInfoWrapper(), this.createFormsWrapper(), this.garageCars]);
     await this.updateGarage();
   }
 
@@ -90,24 +98,19 @@ export class GarageView extends Component {
     return buttonsWrapper;
   }
 
-  createFormWrapper(): Form {
-    const textInput = new InputField({ classes: ['garage__text-input'], type: 'text' });
-    const colorInput = new InputField({ classes: ['garage__color-input'], type: 'color' });
-    const submitButton = new Button({ classes: ['garage__submit-button'], text: 'Create' });
-    const formEl = new Form({
-      classes: ['garage__form', 'garage__form_creator'],
-      onSubmit: (event: Event) => {
-        event.preventDefault();
-        const carName = textInput.getValue();
-        if (!carName) return;
-        const carColor = colorInput.getValue();
-        textInput.setDeffaultValue();
-        this.createCar(carName, carColor).catch(console.error);
+  createFormsWrapper() {
+    const formsWrapper = new Component({ tag: 'div', classes: ['garage__forms-wrapper'] });
+    const createForm = new CarFormView({
+      onSubmit: (name, color) => {
+        this.createCar(name, color).catch(console.error);
       },
+      classes: ['garage__form', 'garage__form_create'],
+      isDisabled: false,
+      submitBtnText: 'Create',
     });
-    formEl.appendChildren([textInput, colorInput, submitButton]);
 
-    return formEl;
+    formsWrapper.appendChildren([createForm, this.updateForm]);
+    return formsWrapper;
   }
 
   async createCar(name: string, color: string) {
@@ -163,7 +166,9 @@ export class GarageView extends Component {
   createEvents(): CarEvents {
     return {
       DELETE: (id: number) => this.deleteCar(id),
-      EDIT: () => {},
+      EDIT: () => {
+        this.updateForm.toggleDisabled(false);
+      },
       START: () => {},
       STOP: () => {},
     };
