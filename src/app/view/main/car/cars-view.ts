@@ -48,9 +48,10 @@ export class CarsView extends Component {
     });
     const carImgWrapper = new Component({ tag: 'div', classes: ['car__image-wrapper'] });
     const carImg = new Component({ tag: 'div', classes: ['car__image'] });
+    const flagContainer = new Component({ tag: 'div', classes: ['car__flag'] });
     carImg.getNode().style.backgroundColor = `${color}`;
     carImgWrapper.appendChildren([carImg]);
-    trackComponent.appendChildren([carImgWrapper]);
+    trackComponent.appendChildren([carImgWrapper, flagContainer]);
     this.carsMap.set(id, {
       name: nameComponent,
       carImgWrapper,
