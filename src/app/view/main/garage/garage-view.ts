@@ -230,10 +230,11 @@ export class GarageView extends Component {
           .catch(console.error);
       },
       STOP: (id: number, onStop: () => void) => {
+        this.garageCars.stopCar(id);
         this.stopRace(id)
           .then(() => {
             onStop();
-            this.garageCars.stopCar(id);
+            this.garageCars.resetCarPosition(id);
           })
           .catch(console.error);
       },

@@ -117,12 +117,14 @@ export class CarsView extends Component {
       classes: ['car__stop-button'],
       text: 'Stop',
       onClick: () => {
+        stopButton.setAttribute('disabled', '');
+
         this.events.STOP(id, () => {
           startButton.removeAttribute('disabled');
         });
-        stopButton.setAttribute('disabled', '');
       },
     });
+    stopButton.setAttribute('disabled', '');
     carControlButtons.appendChildren([startButton, stopButton]);
     return carControlButtons;
   }
@@ -136,10 +138,22 @@ export class CarsView extends Component {
     const carImgWrapper = car.carImgWrapper.getNode();
     console.log('move', carImgWrapper);
     carImgWrapper.style.transition = `transform ${time}s linear`;
+    carImgWrapper.getBoundingClientRect();
     carImgWrapper.style.transform = `translateX(${trackWidth - carWidth}px)`;
   }
 
   stopCar(id: number) {
+    const car = this.carsMap.get(id);
+    if (!car) return;
+
+    const carImgWrapper = car.carImgWrapper.getNode();
+    const matrix = new DOMMatrixReadOnly(getComputedStyle(carImgWrapper).transform);
+    const currentX = matrix.m41;
+    carImgWrapper.style.transition = '';
+    carImgWrapper.style.transform = `translateX(${currentX}px)`;
+  }
+
+  resetCarPosition(id: number) {
     const car = this.carsMap.get(id);
     if (!car) return;
 
