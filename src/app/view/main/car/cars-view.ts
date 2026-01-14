@@ -6,8 +6,8 @@ import './cars.scss';
 export interface CarEvents {
   DELETE: (id: number) => Promise<void>;
   EDIT: () => void;
-  START: () => void;
-  STOP: () => void;
+  START: (id: number, onStart: () => void) => void;
+  STOP: (id: number, onStop: () => void) => void;
 }
 interface CarProperties {
   classes: string[];
@@ -22,6 +22,7 @@ export class CarsView extends Component {
     number,
     {
       name: Component;
+      carImgWrapper: Component;
       track: Component;
     }
   >();
@@ -43,17 +44,21 @@ export class CarsView extends Component {
     const trackComponent = new Component({
       tag: 'div',
       classes: ['car__track'],
-      text: color,
     });
-
+    const carImgWrapper = new Component({ tag: 'div', classes: ['car__image-wrapper'] });
+    const carImg = new Component({ tag: 'div', classes: ['car__image'] });
+    carImg.getNode().style.backgroundColor = `${color}`;
+    carImgWrapper.appendChildren([carImg]);
+    trackComponent.appendChildren([carImgWrapper]);
     this.carsMap.set(id, {
       name: nameComponent,
+      carImgWrapper,
       track: trackComponent,
     });
 
     car.appendChildren([
       this.createCarStateWrapper(id, nameComponent),
-      this.createCarBody(trackComponent),
+      this.createCarBody(id, trackComponent),
       this.createTrackRoad(),
     ]);
 
@@ -90,18 +95,58 @@ export class CarsView extends Component {
     return stateWrapper;
   }
 
-  createCarBody(track: Component): Component {
+  createCarBody(id: number, track: Component): Component {
     const carBody = new Component({ tag: 'div', classes: ['car__body'] });
-    carBody.appendChildren([this.createControlButtons(), track]);
+    carBody.appendChildren([this.createControlButtons(id), track]);
     return carBody;
   }
 
-  createControlButtons(): Component {
+  createControlButtons(id: number): Component {
     const carControlButtons = new Component({ tag: 'div', classes: ['car__control-buttons'] });
-    const startButton = new Button({ classes: ['car__start-button'], text: 'Start' });
-    const stopButton = new Button({ classes: ['car__stop-button'], text: 'Stop' });
+    const startButton = new Button({
+      classes: ['car__start-button'],
+      text: 'Start',
+      onClick: () => {
+        this.events.START(id, () => {
+          stopButton.removeAttribute('disabled');
+        });
+        startButton.setAttribute('disabled', '');
+      },
+    });
+    const stopButton = new Button({
+      classes: ['car__stop-button'],
+      text: 'Stop',
+      onClick: () => {
+        this.events.STOP(id, () => {
+          startButton.removeAttribute('disabled');
+        });
+        stopButton.setAttribute('disabled', '');
+      },
+    });
     carControlButtons.appendChildren([startButton, stopButton]);
     return carControlButtons;
+  }
+
+  moveCar(id: number, velocity: number, distance: number) {
+    const time = distance / velocity / 1000;
+    const car = this.carsMap.get(id);
+    if (!car) return;
+    const trackWidth = car.track.getNode().clientWidth;
+    const carWidth = car.carImgWrapper.getNode().clientWidth;
+    const carImgWrapper = car.carImgWrapper.getNode();
+    console.log('move', carImgWrapper);
+    carImgWrapper.style.transition = `transform ${time}s linear`;
+    carImgWrapper.style.transform = `translateX(${trackWidth - carWidth}px)`;
+  }
+
+  stopCar(id: number) {
+    const car = this.carsMap.get(id);
+    if (!car) return;
+
+    const carImg = car.carImgWrapper.getNode();
+
+    carImg.style.transition = '';
+    carImg.style.transform = `translateX(0)`;
   }
 
   createTrackRoad(): Component {
@@ -124,7 +169,7 @@ export class CarsView extends Component {
     const car = this.carsMap.get(id);
     if (!car) return;
 
-    car.track.setText(newColor);
+    car.carImgWrapper.getAllChildren()[0].getNode().style.backgroundColor = `${newColor}`;
   }
 
   clearCarsMap() {

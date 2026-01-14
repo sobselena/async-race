@@ -81,15 +81,17 @@ export class GarageAPI {
     });
   }
 
-  changeEngineState(id: number, status: 'started' | 'stopped') {
-    return this.sendRequest<Engine>(`${this.engineURL}/id=${id}/status=${status}`, {
+  changeEngineState(id: number, status: 'started' | 'stopped'): Promise<Engine> {
+    return this.sendRequest<Engine>(`${this.engineURL}?id=${id}&status=${status}`, {
       method: 'PATCH',
     });
   }
 
-  async switchToDriveMode(id: number) {
+  async switchToDriveMode(id: number): Promise<{
+    success: boolean;
+  }> {
     try {
-      const response = await fetch(`${BASIC_URL}/engine?id=${id}&status=drive`, {
+      const response = await fetch(`${this.engineURL}?id=${id}&status=drive`, {
         method: 'PATCH',
       });
       if (!response.ok) {
@@ -97,7 +99,9 @@ export class GarageAPI {
         throw new Error(errorText);
       }
 
-      return response.json();
+      return response.json() as Promise<{
+        success: boolean;
+      }>;
     } catch (error) {
       console.error(error);
       throw error;

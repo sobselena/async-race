@@ -1,0 +1,29 @@
+.car__state-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.car__state {
+  margin-left: auto;
+}
+
+.car__body {
+  display: flex;
+  align-items: center;
+}
+.car__image-wrapper {
+  height: 3.2rem;
+  width: 3.2rem;
+}
+.car__image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+
+  border: 4px solid #222;
+}
+
+.car__track {
+  width: 40%;
+  padding: 1.2rem;
+}

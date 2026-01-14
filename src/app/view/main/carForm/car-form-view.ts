@@ -55,7 +55,6 @@ export class CarFormView extends Component {
   }
 
   setCarValues(carParams: Car) {
-    console.log(carParams);
     (this.textInput.getNode() as HTMLInputElement).value = carParams.name;
     (this.colorInput.getNode() as HTMLInputElement).value = carParams.color;
   }

@@ -145,7 +145,6 @@ export class GarageView extends Component {
       this.updateForm.toggleDisabled(true);
       this.updateForm.setDefaultValues();
     }
-    console.log(id, this.garageCars.getEditId());
     await this.garageAPI.deleteCar(id);
     await this.updateGarage();
     if (this.garageAPI.getTotalCount() % GARAGE_PAGINATION_LIMIT === 0 && isLastPage) {
@@ -189,6 +188,21 @@ export class GarageView extends Component {
     this.carsCount.setText(`${this.garageAPI.getTotalCount()}`);
   }
 
+  async startRace(id: number) {
+    const startEngineStateData = await this.garageAPI.changeEngineState(id, 'started');
+    // const switchToDriveModeData = await this.garageAPI.switchToDriveMode(id);
+    console.log(`id: ${id}`);
+    // console.log('switchToDriveModeData:', switchToDriveModeData);
+    console.log('startEngineStateData:', startEngineStateData);
+    return startEngineStateData;
+  }
+
+  async stopRace(id: number) {
+    const stopChangeEngineStateData = await this.garageAPI.changeEngineState(id, 'stopped');
+    console.log(`id: ${id}`);
+    console.log('startEngineStateData:', stopChangeEngineStateData);
+  }
+
   createEvents(): CarEvents {
     return {
       DELETE: (id: number) => this.deleteCar(id),
@@ -206,8 +220,23 @@ export class GarageView extends Component {
           })
           .catch(console.error);
       },
-      START: () => {},
-      STOP: () => {},
+      START: (id: number, onStart: () => void) => {
+        this.startRace(id)
+          .then(({ velocity, distance }) => {
+            onStart();
+            console.log(id, velocity, distance);
+            this.garageCars.moveCar(id, velocity, distance);
+          })
+          .catch(console.error);
+      },
+      STOP: (id: number, onStop: () => void) => {
+        this.stopRace(id)
+          .then(() => {
+            onStop();
+            this.garageCars.stopCar(id);
+          })
+          .catch(console.error);
+      },
     };
   }
 }

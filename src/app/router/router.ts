@@ -48,7 +48,6 @@ export class Router {
 
   urlChangeHandler() {
     const url = this.getUrl();
-    console.log(url);
     this.navigate(url);
   }
 
