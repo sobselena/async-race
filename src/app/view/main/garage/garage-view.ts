@@ -190,9 +190,11 @@ export class GarageView extends Component {
 
   async startRace(id: number) {
     const startEngineStateData = await this.garageAPI.changeEngineState(id, 'started');
-    // const switchToDriveModeData = await this.garageAPI.switchToDriveMode(id);
+    this.garageAPI.switchToDriveMode(id).catch(error => {
+      this.garageCars.stopCar(id);
+      console.error(error);
+    });
     console.log(`id: ${id}`);
-    // console.log('switchToDriveModeData:', switchToDriveModeData);
     console.log('startEngineStateData:', startEngineStateData);
     return startEngineStateData;
   }
