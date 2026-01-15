@@ -98,6 +98,10 @@ export class GarageView extends Component {
     const startRaceButton = new Button({
       classes: ['garage__button', 'garage__button_start-race'],
       text: 'Start Race',
+      onClick: () => {
+        if (!this.carsData) return;
+        this.garageCars.startAllRaces(this.carsData);
+      },
     });
 
     const resetButton = new Button({

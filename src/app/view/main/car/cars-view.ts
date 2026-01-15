@@ -1,4 +1,4 @@
-import type { Car } from '../../../api/garageAPI';
+import type { Car, CarsResponse } from '../../../api/garageAPI';
 import { Button } from '../../../components/button/button-creator';
 import { Component } from '../../../utils/Component';
 import './cars.scss';
@@ -25,6 +25,8 @@ export class CarsView extends Component {
       carImgWrapper: Component;
       track: Component;
       stateContainer?: Component;
+      startButton?: Component;
+      stopButton?: Component;
     }
   >();
 
@@ -108,17 +110,6 @@ export class CarsView extends Component {
 
   createControlButtons(id: number): Component {
     const carControlButtons = new Component({ tag: 'div', classes: ['car__control-buttons'] });
-    const startButton = new Button({
-      classes: ['car__start-button'],
-      text: 'Start',
-      onClick: () => {
-        this.events.START(id, () => {
-          stopButton.removeAttribute('disabled');
-          this.carsMap.get(id)?.stateContainer?.setText('moving');
-        });
-        startButton.setAttribute('disabled', '');
-      },
-    });
     const stopButton = new Button({
       classes: ['car__stop-button'],
       text: 'Stop',
@@ -130,9 +121,41 @@ export class CarsView extends Component {
         });
       },
     });
+    const carData = this.carsMap.get(id);
+
+    const startButton = new Button({
+      classes: ['car__start-button'],
+      text: 'Start',
+      onClick: () => {
+        this.events.START(id, () => {
+          stopButton.removeAttribute('disabled');
+          this.carsMap.get(id)?.stateContainer?.setText('moving');
+        });
+        startButton.setAttribute('disabled', '');
+      },
+    });
+    if (carData) {
+      this.carsMap.set(id, { ...carData, stopButton, startButton });
+    }
     stopButton.setAttribute('disabled', '');
     carControlButtons.appendChildren([startButton, stopButton]);
     return carControlButtons;
+  }
+
+  startAllRaces(carsData: CarsResponse) {
+    carsData.data.forEach(({ id }) => {
+      const car = this.carsMap.get(id);
+      if (!car) return;
+
+      if (car.stateContainer?.getNode().textContent !== 'in garage') return;
+
+      car.startButton?.setAttribute('disabled', '');
+
+      this.events.START(id, () => {
+        car.stopButton?.removeAttribute('disabled');
+        car.stateContainer?.setText('moving');
+      });
+    });
   }
 
   moveCar(id: number, velocity: number, distance: number) {
