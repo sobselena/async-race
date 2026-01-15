@@ -1,4 +1,6 @@
-const BASIC_URL = 'http://127.0.0.1:3000';
+import { BaseAPI } from './baseAPI';
+
+export const BASIC_URL = 'http://127.0.0.1:3000';
 export interface Car {
   name: string;
   color: string;
@@ -12,24 +14,15 @@ export interface CarsResponse {
   data: Car[];
   totalCount: number;
 }
-export class GarageAPI {
+export class GarageAPI extends BaseAPI {
   private readonly garageURL = `${BASIC_URL}/garage`;
 
   private readonly engineURL = `${BASIC_URL}/engine`;
 
   private totalCount: number = 0;
 
-  constructor() {}
-
-  async sendRequest<T>(url: string, requestOpions?: RequestInit): Promise<T> {
-    try {
-      const response = await fetch(url, requestOpions);
-      if (!response.ok) throw new Error(`Request Error: ${response.status}`);
-      return (await response.json()) as T;
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
+  constructor() {
+    super();
   }
 
   async getCars(page: number, limit: number): Promise<CarsResponse> {
@@ -50,35 +43,37 @@ export class GarageAPI {
     return this.sendRequest<Car>(`${this.garageURL}/${id}`);
   }
 
-  createCar(carParams: Omit<Car, 'id'>) {
-    const body = JSON.stringify({
-      name: carParams.name,
-      color: carParams.color,
-    });
-    this.totalCount += 1;
-    return this.sendRequest<Car>(`${this.garageURL}`, {
+  async createCar(carParams: Omit<Car, 'id'>) {
+    const carData = await this.sendRequest<Car>(this.garageURL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body,
+      body: JSON.stringify(carParams),
     });
+
+    this.totalCount += 1;
+    return carData;
   }
 
   async deleteCar(id: number): Promise<void> {
+    await this.sendRequest<void>(`${this.garageURL}/${id}`, { method: 'DELETE' });
     this.totalCount -= 1;
-    await fetch(`${this.garageURL}/${id}`, {
-      method: 'DELETE',
-    });
   }
 
   async updateCar({ name, color, id }: Car): Promise<void> {
-    const body = JSON.stringify({ name, color });
-    await fetch(`${this.garageURL}/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body,
-    });
+    try {
+      const body = JSON.stringify({ name, color });
+      const response = await fetch(`${this.garageURL}/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body,
+      });
+      if (!response.ok) throw new Error(`Request Error: ${response.status}`);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   changeEngineState(id: number, status: 'started' | 'stopped'): Promise<Engine> {
