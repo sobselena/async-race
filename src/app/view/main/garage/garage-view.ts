@@ -1,12 +1,13 @@
 import { GarageAPI, type Car, type CarsResponse } from '../../../api/garageAPI';
 import { Button } from '../../../components/button/button-creator';
 import { Component } from '../../../utils/Component';
-import { CarsView, type CarEvents } from '../car/cars-view';
+import { carStates, CarsView, type CarEvents } from '../car/cars-view';
 import { CarFormView } from '../carForm/car-form-view';
 import { PaginationView } from '../pagination/pagination-view';
 import './garage.scss';
 
 const GARAGE_PAGINATION_LIMIT = 7;
+
 export class GarageView extends Component {
   private carsData: CarsResponse | null = null;
 
@@ -146,7 +147,7 @@ export class GarageView extends Component {
     this.pagination.updateTotalCount(this.garageAPI.getTotalCount());
   }
 
-  async deleteCar(id: number) {
+  async handleDelete(id: number) {
     const isLastPage = this.isLastPage();
     if (id === this.garageCars.getEditId()) {
       this.garageCars.resetEditId();
@@ -199,7 +200,12 @@ export class GarageView extends Component {
   async startRace(id: number) {
     const startEngineStateData = await this.garageAPI.changeEngineState(id, 'started');
     this.garageAPI.switchToDriveMode(id).catch(error => {
-      this.garageCars.stopCar(id);
+      const car = this.garageCars.getCarsMap().get(id);
+
+      if (!car) return;
+
+      if (car.state !== carStates.MOVING && car.state !== carStates.START_PENDING) return;
+      this.garageCars.stopCar(id, carStates.BROKEN);
       console.error(error);
     });
     console.log(`id: ${id}`);
@@ -213,53 +219,62 @@ export class GarageView extends Component {
     console.log('startEngineStateData:', stopChangeEngineStateData);
   }
 
+  private handleEdit() {
+    const id = this.garageCars.getEditId();
+    if (!id) {
+      this.updateForm.toggleDisabled(true);
+      return;
+    }
+    this.updateForm.toggleDisabled(false);
+    this.garageAPI
+      .getCar(id)
+      .then(data => this.updateForm.setCarValues(data))
+      .catch(console.error);
+  }
+
+  private async handleStart(id: number) {
+    const car = this.garageCars.getCarsMap().get(id);
+    if (!car || car.state !== carStates.IN_GARAGE) return;
+
+    car.state = carStates.START_PENDING;
+    car.startButton?.setAttribute('disabled', '');
+
+    try {
+      const { velocity, distance } = await this.startRace(id);
+      if (car.state !== carStates.START_PENDING) return;
+      car.state = carStates.MOVING;
+      car.stopButton?.removeAttribute('disabled');
+      car.stateContainer?.setText(carStates.MOVING);
+      this.garageCars.moveCar(id, velocity, distance);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  private async handleStop(id: number) {
+    const car = this.garageCars.getCarsMap().get(id);
+    if (!car || car.state === carStates.STOPPED) return;
+
+    car.stopButton?.setAttribute('disabled', '');
+    this.garageCars.stopCar(id, carStates.STOPPED);
+
+    try {
+      await this.stopRace(id);
+      car.startButton?.removeAttribute('disabled');
+      car.stateContainer?.setText(carStates.IN_GARAGE);
+      car.state = carStates.IN_GARAGE;
+      this.garageCars.resetCarPosition(id);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   createEvents(): CarEvents {
     return {
-      DELETE: (id: number) => this.deleteCar(id),
-      EDIT: () => {
-        const id = this.garageCars.getEditId();
-        if (!id) {
-          this.updateForm.toggleDisabled(true);
-          return;
-        }
-        this.updateForm.toggleDisabled(false);
-        this.garageAPI
-          .getCar(id)
-          .then(data => {
-            this.updateForm.setCarValues(data);
-          })
-          .catch(console.error);
-      },
-      START: (id: number, onStart: () => void) => {
-        const car = this.garageCars.getCarsMap().get(id);
-        if (!car) return;
-        car.state = 'startPending';
-        this.startRace(id)
-          .then(({ velocity, distance }) => {
-            if (car.state === 'stopPending') return;
-            car.state = 'moving';
-
-            onStart();
-            console.log(id, velocity, distance);
-            this.garageCars.moveCar(id, velocity, distance);
-          })
-          .catch(console.error);
-      },
-      STOP: (id: number, onStop: () => void) => {
-        const car = this.garageCars.getCarsMap().get(id);
-        if (!car || car.state === 'stopPending') return;
-        if (car.state !== 'finished') {
-          car.state = 'stopPending';
-        }
-        this.garageCars.stopCar(id);
-        this.stopRace(id)
-          .then(() => {
-            onStop();
-            car.state = 'in garage';
-            this.garageCars.resetCarPosition(id);
-          })
-          .catch(console.error);
-      },
+      DELETE: (id: number) => this.handleDelete(id),
+      EDIT: () => this.handleEdit(),
+      START: (id: number) => this.handleStart(id),
+      STOP: (id: number) => this.handleStop(id),
     };
   }
 }
