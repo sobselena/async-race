@@ -27,6 +27,7 @@ export class CarsView extends Component {
       stateContainer?: Component;
       startButton?: Component;
       stopButton?: Component;
+      state: 'startPending' | 'moving' | 'in garage' | 'stopPending' | 'finished';
     }
   >();
 
@@ -58,6 +59,7 @@ export class CarsView extends Component {
       name: nameComponent,
       carImgWrapper,
       track: trackComponent,
+      state: 'in garage',
     });
 
     car.appendChildren([
@@ -128,8 +130,11 @@ export class CarsView extends Component {
       text: 'Start',
       onClick: () => {
         this.events.START(id, () => {
+          const car = this.carsMap.get(id);
+          if (!car || car.state === 'stopPending') return;
           stopButton.removeAttribute('disabled');
-          this.carsMap.get(id)?.stateContainer?.setText('moving');
+          car.stateContainer?.setText('moving');
+          car.state = 'moving';
         });
         startButton.setAttribute('disabled', '');
       },
@@ -145,9 +150,7 @@ export class CarsView extends Component {
   startAllRaces(carsData: CarsResponse) {
     carsData.data.forEach(({ id }) => {
       const car = this.carsMap.get(id);
-      if (!car) return;
-
-      if (car.stateContainer?.getNode().textContent !== 'in garage') return;
+      if (!car || car.state !== 'in garage') return;
 
       car.startButton?.setAttribute('disabled', '');
 
@@ -158,10 +161,26 @@ export class CarsView extends Component {
     });
   }
 
+  stopAllRaces(carsData: CarsResponse) {
+    carsData.data.forEach(({ id }) => {
+      const car = this.carsMap.get(id);
+      if (!car || car.state === 'in garage') return;
+      car.stopButton?.setAttribute('disabled', '');
+      this.events.STOP(id, () => {
+        car.startButton?.removeAttribute('disabled');
+        car.stateContainer?.setText('in garage');
+      });
+    });
+  }
+
+  getCarsMap() {
+    return this.carsMap;
+  }
+
   moveCar(id: number, velocity: number, distance: number) {
     const time = distance / velocity / 1000;
     const car = this.carsMap.get(id);
-    if (!car) return;
+    if (!car || car.state !== 'moving') return;
     const trackWidth = car.track.getNode().clientWidth;
     const carWidth = car.carImgWrapper.getNode().clientWidth;
     const carImgWrapper = car.carImgWrapper.getNode();
@@ -171,7 +190,8 @@ export class CarsView extends Component {
     carImgWrapper.style.transform = `translateX(${trackWidth - carWidth}px)`;
     const transitionEndCallback = () => {
       car.carImgWrapper.deleteListener('transitionend', transitionEndCallback);
-      this.carsMap.get(id)?.stateContainer?.setText('finished');
+      car.state = 'finished';
+      car.stateContainer?.setText('finished');
     };
     car.carImgWrapper.addListener('transitionend', transitionEndCallback);
   }
@@ -185,7 +205,7 @@ export class CarsView extends Component {
     const currentX = matrix.m41;
     carImgWrapper.style.transition = '';
     carImgWrapper.style.transform = `translateX(${currentX}px)`;
-    if (car.stateContainer?.getNode().textContent !== 'finished') {
+    if (car.state === 'moving' || car.state === 'stopPending') {
       car.stateContainer?.setText('broken');
     }
   }

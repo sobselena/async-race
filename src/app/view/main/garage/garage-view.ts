@@ -107,6 +107,10 @@ export class GarageView extends Component {
     const resetButton = new Button({
       classes: ['garage__button', 'garage__button_reset'],
       text: 'Reset Race',
+      onClick: () => {
+        if (!this.carsData) return;
+        this.garageCars.stopAllRaces(this.carsData);
+      },
     });
     buttonsWrapper.appendChildren([generateButton, startRaceButton, resetButton]);
     return buttonsWrapper;
@@ -227,8 +231,14 @@ export class GarageView extends Component {
           .catch(console.error);
       },
       START: (id: number, onStart: () => void) => {
+        const car = this.garageCars.getCarsMap().get(id);
+        if (!car) return;
+        car.state = 'startPending';
         this.startRace(id)
           .then(({ velocity, distance }) => {
+            if (car.state === 'stopPending') return;
+            car.state = 'moving';
+
             onStart();
             console.log(id, velocity, distance);
             this.garageCars.moveCar(id, velocity, distance);
@@ -236,10 +246,16 @@ export class GarageView extends Component {
           .catch(console.error);
       },
       STOP: (id: number, onStop: () => void) => {
+        const car = this.garageCars.getCarsMap().get(id);
+        if (!car || car.state === 'stopPending') return;
+        if (car.state !== 'finished') {
+          car.state = 'stopPending';
+        }
         this.garageCars.stopCar(id);
         this.stopRace(id)
           .then(() => {
             onStop();
+            car.state = 'in garage';
             this.garageCars.resetCarPosition(id);
           })
           .catch(console.error);
