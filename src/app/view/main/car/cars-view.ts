@@ -219,7 +219,7 @@ export class CarsView extends Component {
 
     const carImg = car.carImgWrapper.getNode();
     car.stateContainer?.setText(carStates.IN_GARAGE);
-    carImg.style.transition = '';
+    carImg.style.transition = ``;
     carImg.style.transform = `translateX(0)`;
   }
 

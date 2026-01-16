@@ -29,6 +29,15 @@ export class GarageView extends Component {
     },
   });
 
+  private createForm = new CarFormView({
+    onSubmit: (name, color) => {
+      this.createCar(name, color).catch(console.error);
+    },
+    classes: ['garage__form', 'garage__form_create'],
+    isDisabled: false,
+    submitBtnText: 'Create',
+  });
+
   private updateForm: CarFormView = new CarFormView({
     onSubmit: (name: string, color: string) => {
       this.updateForm.toggleDisabled(true);
@@ -131,16 +140,8 @@ export class GarageView extends Component {
 
   createFormsWrapper() {
     const formsWrapper = new Component({ tag: 'div', classes: ['garage__forms-wrapper'] });
-    const createForm = new CarFormView({
-      onSubmit: (name, color) => {
-        this.createCar(name, color).catch(console.error);
-      },
-      classes: ['garage__form', 'garage__form_create'],
-      isDisabled: false,
-      submitBtnText: 'Create',
-    });
 
-    formsWrapper.appendChildren([createForm, this.updateForm]);
+    formsWrapper.appendChildren([this.createForm, this.updateForm]);
     return formsWrapper;
   }
 
@@ -289,6 +290,7 @@ export class GarageView extends Component {
     if (this.isDisabled) return;
     this.isDisabled = true;
     this.updateForm.toggleDisabled(true);
+    this.createForm.toggleDisabled(true);
     this.pagination.toggleButtons(true);
     this.startRaceButton?.setAttribute('disabled', '');
     this.resetButton?.removeAttribute('disabled');
@@ -306,8 +308,9 @@ export class GarageView extends Component {
     this.isDisabled = false;
     this.pagination.toggleButtons(false);
     this.updateForm.toggleDisabled(false);
+    this.createForm.toggleDisabled(false);
     this.startRaceButton?.removeAttribute('disabled');
-
+    this.resetButton?.setAttribute('disabled', '');
     this.garageCars.getCarsMap().forEach(car => {
       car.editButton?.removeAttribute('disabled');
       car.deleteButton?.removeAttribute('disabled');
