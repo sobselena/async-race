@@ -20,6 +20,10 @@ export class PaginationView extends Component {
 
   private paginationProperties: PaginationProperties;
 
+  private nextButton: Component | null = null;
+
+  private prevButton: Component | null = null;
+
   constructor(paginationProperties: PaginationProperties) {
     super({ tag: 'div', classes: ['pagination'] });
     this.paginationProperties = paginationProperties;
@@ -34,7 +38,7 @@ export class PaginationView extends Component {
   }
 
   createPagination() {
-    const prevButton = new Button({
+    this.prevButton = new Button({
       classes: ['pagination__button', 'pagination__button_prev'],
       text: 'Prev',
       onClick: this.decreaseCurrentPage.bind(this),
@@ -49,13 +53,13 @@ export class PaginationView extends Component {
       new Component({ tag: 'span', text: '/' }),
       this.maxPageEl
     );
-    const nextButton = new Button({
+    this.nextButton = new Button({
       classes: ['pagination__button', 'pagination__button_next'],
       text: 'Next',
       onClick: this.increaseCurrentPage.bind(this),
     });
 
-    super.appendChildren([prevButton, currentPageEl, nextButton]);
+    super.appendChildren([this.prevButton, currentPageEl, this.nextButton]);
   }
 
   decreaseCurrentPage() {
@@ -89,5 +93,15 @@ export class PaginationView extends Component {
 
   getMaxPage(): number {
     return Math.ceil(this.totalCount / this.limit) || 1;
+  }
+
+  toggleButtons(isDisabled: boolean) {
+    if (isDisabled) {
+      this.nextButton?.setAttribute('disabled', '');
+      this.prevButton?.setAttribute('disabled', '');
+    } else {
+      this.nextButton?.removeAttribute('disabled');
+      this.prevButton?.removeAttribute('disabled');
+    }
   }
 }

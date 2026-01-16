@@ -15,7 +15,7 @@ interface CarProperties {
 }
 export const carStates = {
   IN_GARAGE: 'in garage',
-  START_PENDING: 'startPending',
+  STARTING: 'strarting',
   MOVING: 'moving',
   BROKEN: 'broken',
   FINISHED: 'finished',
@@ -36,6 +36,8 @@ export class CarsView extends Component {
       stateContainer?: Component;
       startButton?: Component;
       stopButton?: Component;
+      editButton?: Component;
+      deleteButton?: Component;
       state: CarStatesValues;
     }
   >();
@@ -81,6 +83,8 @@ export class CarsView extends Component {
   }
 
   createCarStateWrapper(id: number, carName: Component): Component {
+    const car = this.carsMap.get(id);
+
     const stateWrapper = new Component({ tag: 'div', classes: ['car__state-wrapper'] });
 
     const editButton = new Button({
@@ -99,7 +103,13 @@ export class CarsView extends Component {
         this.events.DELETE(id).catch(console.error);
       },
     });
-
+    if (car) {
+      this.carsMap.set(id, {
+        ...car,
+        deleteButton,
+        editButton,
+      });
+    }
     const stateContainer = new Component({
       tag: 'div',
       classes: ['car__state'],
@@ -156,12 +166,15 @@ export class CarsView extends Component {
     });
   }
 
-  stopAllRaces(carsData: CarsResponse) {
-    carsData.data.forEach(({ id }) => {
-      const car = this.carsMap.get(id);
-      if (!car || car.state === carStates.IN_GARAGE) return;
-      this.events.STOP(id).catch(console.error);
-    });
+  async stopAllRaces(carsData: CarsResponse) {
+    await Promise.all(
+      carsData.data
+        .filter(({ id }) => {
+          const car = this.carsMap.get(id);
+          return car && car.state !== carStates.IN_GARAGE;
+        })
+        .map(({ id }) => this.events.STOP(id))
+    );
   }
 
   getCarsMap() {

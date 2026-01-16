@@ -9,6 +9,10 @@ import './garage.scss';
 const GARAGE_PAGINATION_LIMIT = 7;
 
 export class GarageView extends Component {
+  private isDisabled: boolean = false;
+
+  private isAllStarted: boolean = false;
+
   private carsData: CarsResponse | null = null;
 
   private garageCars: CarsView = this.createGarageCars();
@@ -43,6 +47,10 @@ export class GarageView extends Component {
     isDisabled: true,
     submitBtnText: 'Update',
   });
+
+  private resetButton: Button | null = null;
+
+  private startRaceButton: Button | null = null;
 
   constructor() {
     super({ tag: 'div', classes: ['garage'] });
@@ -96,24 +104,28 @@ export class GarageView extends Component {
       text: 'Generate 100 Cars',
     });
 
-    const startRaceButton = new Button({
+    this.startRaceButton = new Button({
       classes: ['garage__button', 'garage__button_start-race'],
       text: 'Start Race',
       onClick: () => {
         if (!this.carsData) return;
+        this.isAllStarted = true;
         this.garageCars.startAllRaces(this.carsData);
       },
     });
 
-    const resetButton = new Button({
+    this.resetButton = new Button({
       classes: ['garage__button', 'garage__button_reset'],
       text: 'Reset Race',
       onClick: () => {
         if (!this.carsData) return;
-        this.garageCars.stopAllRaces(this.carsData);
+        this.resetButton?.setAttribute('disabled', '');
+        this.garageCars.stopAllRaces(this.carsData).catch(console.error);
+        this.isAllStarted = false;
       },
     });
-    buttonsWrapper.appendChildren([generateButton, startRaceButton, resetButton]);
+    this.resetButton.setAttribute('disabled', '');
+    buttonsWrapper.appendChildren([generateButton, this.startRaceButton, this.resetButton]);
     return buttonsWrapper;
   }
 
@@ -204,7 +216,7 @@ export class GarageView extends Component {
 
       if (!car) return;
 
-      if (car.state !== carStates.MOVING && car.state !== carStates.START_PENDING) return;
+      if (car.state !== carStates.MOVING && car.state !== carStates.STARTING) return;
       this.garageCars.stopCar(id, carStates.BROKEN);
       console.error(error);
     });
@@ -236,14 +248,18 @@ export class GarageView extends Component {
     const car = this.garageCars.getCarsMap().get(id);
     if (!car || car.state !== carStates.IN_GARAGE) return;
 
-    car.state = carStates.START_PENDING;
+    car.state = carStates.STARTING;
+    car.stateContainer?.setText(carStates.STARTING);
     car.startButton?.setAttribute('disabled', '');
-
+    this.disableAllButtons();
     try {
       const { velocity, distance } = await this.startRace(id);
-      if (car.state !== carStates.START_PENDING) return;
+      if (car.state !== carStates.STARTING) return;
       car.state = carStates.MOVING;
-      car.stopButton?.removeAttribute('disabled');
+      if (!this.isAllStarted) {
+        car.stopButton?.removeAttribute('disabled');
+      }
+
       car.stateContainer?.setText(carStates.MOVING);
       this.garageCars.moveCar(id, velocity, distance);
     } catch (error) {
@@ -257,16 +273,45 @@ export class GarageView extends Component {
 
     car.stopButton?.setAttribute('disabled', '');
     this.garageCars.stopCar(id, carStates.STOPPED);
-
     try {
       await this.stopRace(id);
+      car.state = carStates.IN_GARAGE;
+      this.makeAllButtonsAvailable();
       car.startButton?.removeAttribute('disabled');
       car.stateContainer?.setText(carStates.IN_GARAGE);
-      car.state = carStates.IN_GARAGE;
       this.garageCars.resetCarPosition(id);
     } catch (error) {
       console.error(error);
     }
+  }
+
+  disableAllButtons() {
+    if (this.isDisabled) return;
+    this.isDisabled = true;
+    this.updateForm.toggleDisabled(true);
+    this.pagination.toggleButtons(true);
+    this.startRaceButton?.setAttribute('disabled', '');
+    this.resetButton?.removeAttribute('disabled');
+    this.garageCars.getCarsMap().forEach(car => {
+      car.editButton?.setAttribute('disabled', '');
+      car.deleteButton?.setAttribute('disabled', '');
+    });
+  }
+
+  makeAllButtonsAvailable() {
+    const inGarage = Array.from(this.garageCars.getCarsMap().values()).every(carData => {
+      return carData.state === carStates.IN_GARAGE;
+    });
+    if (!inGarage) return;
+    this.isDisabled = false;
+    this.pagination.toggleButtons(false);
+    this.updateForm.toggleDisabled(false);
+    this.startRaceButton?.removeAttribute('disabled');
+
+    this.garageCars.getCarsMap().forEach(car => {
+      car.editButton?.removeAttribute('disabled');
+      car.deleteButton?.removeAttribute('disabled');
+    });
   }
 
   createEvents(): CarEvents {
