@@ -2,7 +2,7 @@ import { NamePages } from './router/pages';
 import { Router, type Routes } from './router/router';
 import type { Component } from './utils/Component';
 import { HeaderView } from './view/header/header-view';
-import { GarageView } from './view/main/garage/garage-view';
+import { GarageView } from './view/main/garage/view/garage/garage-view';
 import { MainView } from './view/main/main-view';
 import { WinnersView } from './view/main/winners/winners-view';
 
