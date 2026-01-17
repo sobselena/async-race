@@ -41,6 +41,7 @@ export class GarageView extends Component {
       updateForm: this.updateForm,
       startAllBtn: this.startRaceBtn,
       resetAllBtn: this.resetRaceBtn,
+      pagination: this.pagination,
     });
     this.appendChildren([formWrapper, this.carsView, this.pagination]);
 
@@ -86,14 +87,8 @@ export class GarageView extends Component {
       classes: ['garage__button'],
       text: 'Start All Races',
       onClick: () => {
-        this.carsView.toggleAllButtons(true);
         this.startRaceBtn.setAttribute('disabled', '');
-        this.controller
-          .startAll()
-          .then(() => {
-            this.resetRaceBtn.removeAttribute('disabled');
-          })
-          .catch(console.error);
+        this.controller.startAll().catch(console.error);
       },
     });
 
@@ -101,14 +96,8 @@ export class GarageView extends Component {
       classes: ['garage__button'],
       text: 'Reset All Races',
       onClick: () => {
-        this.carsView.toggleAllButtons(false);
         this.resetRaceBtn.setAttribute('disabled', '');
-        this.controller
-          .stopAll()
-          .then(() => {
-            this.startRaceBtn.removeAttribute('disabled');
-          })
-          .catch(console.error);
+        this.controller.stopAll().catch(console.error);
       },
     });
 

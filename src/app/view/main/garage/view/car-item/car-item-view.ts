@@ -138,8 +138,6 @@ export class CarItemView extends Component {
       case carStates.IN_GARAGE:
         this.startBtn.removeAttribute('disabled');
         this.stopBtn.setAttribute('disabled', '');
-        this.editBtn.removeAttribute('disabled');
-        this.deleteBtn.removeAttribute('disabled');
         break;
 
       case carStates.MOVING:
@@ -147,21 +145,16 @@ export class CarItemView extends Component {
       case carStates.BROKEN:
         this.startBtn.setAttribute('disabled', '');
         this.stopBtn.removeAttribute('disabled');
-        this.editBtn.setAttribute('disabled', '');
-        this.deleteBtn.setAttribute('disabled', '');
+
         break;
       case carStates.STARTING:
       case carStates.STOPPED:
         this.startBtn.setAttribute('disabled', '');
         this.stopBtn.setAttribute('disabled', '');
-        this.editBtn.setAttribute('disabled', '');
-        this.deleteBtn.setAttribute('disabled', '');
         break;
       default:
         this.startBtn.removeAttribute('disabled');
         this.stopBtn.setAttribute('disabled', '');
-        this.editBtn.removeAttribute('disabled');
-        this.deleteBtn.removeAttribute('disabled');
     }
   }
 
@@ -191,6 +184,16 @@ export class CarItemView extends Component {
 
   getId() {
     return this.id;
+  }
+
+  disableStateButtons(isDisabled: boolean) {
+    if (isDisabled) {
+      this.editBtn.setAttribute('disabled', '');
+      this.deleteBtn.setAttribute('disabled', '');
+    } else {
+      this.editBtn.removeAttribute('disabled');
+      this.deleteBtn.removeAttribute('disabled');
+    }
   }
 
   setButtonsDisabled(disabled: boolean) {
