@@ -59,6 +59,7 @@ export class RaceController {
     if (!car || car.state !== carStates.IN_GARAGE) return;
     const currentTime: number = Date.now();
     this.store.setTimeId(id, currentTime);
+    this.store.setStartTime(id, currentTime);
     this.startAllBtn.setAttribute('disabled', '');
     this.resetAllBtn.removeAttribute('disabled');
     this.view.getCarsMap().forEach(carItem => {
@@ -96,6 +97,7 @@ export class RaceController {
     if (!carView) return;
     const currentTime: number = Date.now();
     this.store.setTimeId(id, currentTime);
+    this.store.setStartTime(id, 0);
     this.store.setState(id, carStates.STOPPED);
     carView.setState(carStates.STOPPED);
     carView.stopMove();
@@ -136,7 +138,6 @@ export class RaceController {
     this.store.resetWinner();
     this.store.setIsAllStarted(true);
     const cars = this.store.all();
-
     await Promise.all(
       cars.filter(car => car.state === carStates.IN_GARAGE).map(car => this.start(car.id))
     );
@@ -151,21 +152,16 @@ export class RaceController {
     this.store.setIsAllStarted(false);
   }
 
-  async finish(id: number, currentTime: number) {
+  async finish(id: number) {
     const isWinner = this.store.setWinner(id);
     const carView = this.view.get(id);
+    const raceTime = Number(((Date.now() - this.store.getStartTime(id)) / 1000).toFixed(2));
     if (!isWinner) {
-      carView?.setState(
-        carStates.FINISHED,
-        `${carStates.FINISHED}(${Math.round(currentTime * 100) / 100}s)`
-      );
+      carView?.setState(carStates.FINISHED, `${carStates.FINISHED}(${raceTime}s)`);
       return;
     }
 
-    carView?.setState(
-      carStates.WINNER,
-      `${carStates.WINNER}(${Math.round(currentTime * 100) / 100}s)`
-    );
+    carView?.setState(carStates.WINNER, `${carStates.WINNER}(${raceTime}s)`);
     let winner;
     try {
       winner = await this.winnerAPI.getWinner(id);
@@ -177,10 +173,12 @@ export class RaceController {
       await this.winnerAPI.updateWinner({
         id,
         wins: winner.wins + 1,
-        time: Math.min(winner.time, currentTime),
+        time: Math.min(winner.time, raceTime),
       });
     } else {
-      await this.winnerAPI.createWinner({ id, wins: 1, time: currentTime });
+      await this.winnerAPI.createWinner({ id, wins: 1, time: raceTime });
     }
+
+    this.store.setStartTime(id, 0);
   }
 }

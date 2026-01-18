@@ -152,8 +152,8 @@ export class GarageView extends Component {
         },
         onDelete: id => this.deleteCar(id),
         onEdit: id => this.controller.edit(id, car),
-        onFinish: (id, time) => {
-          return this.controller.finish(id, time);
+        onFinish: id => {
+          return this.controller.finish(id);
         },
       });
 

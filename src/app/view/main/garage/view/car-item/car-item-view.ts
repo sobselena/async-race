@@ -9,7 +9,7 @@ interface CarItemEvents {
   onStop(id: number): Promise<void>;
   onEdit(id: number): void;
   onDelete(id: number): Promise<void>;
-  onFinish(id: number, time: number): Promise<void>;
+  onFinish(id: number): Promise<void>;
 }
 
 export class CarItemView extends Component {
@@ -168,7 +168,7 @@ export class CarItemView extends Component {
     const transitionEndCallback = () => {
       imgNode.removeEventListener('transitionend', transitionEndCallback);
 
-      this.events.onFinish(this.id, time).catch(console.error);
+      this.events.onFinish(this.id).catch(console.error);
     };
     imgNode.addEventListener('transitionend', transitionEndCallback);
   }

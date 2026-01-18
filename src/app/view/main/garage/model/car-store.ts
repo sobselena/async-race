@@ -4,6 +4,7 @@ export interface CarRuntimeData {
   id: number;
   state: CarStatesValues;
   timeId: number;
+  startTime: number;
 }
 
 export class CarsStore {
@@ -38,17 +39,27 @@ export class CarsStore {
   }
 
   init(id: number) {
-    this.cars.set(id, { id, state: carStates.IN_GARAGE, timeId: 0 });
+    this.cars.set(id, { id, state: carStates.IN_GARAGE, timeId: 0, startTime: 0 });
+  }
+
+  setStartTime(id: number, newTime: number) {
+    const car = this.get(id);
+    if (!car) return;
+    car.startTime = newTime;
+  }
+
+  getStartTime(id: number) {
+    return this.get(id)?.startTime || 0;
   }
 
   setTimeId(id: number, timeId: number) {
-    const car = this.cars.get(id);
+    const car = this.get(id);
     if (!car) return;
     car.timeId = timeId;
   }
 
   setState(id: number, state: CarStatesValues) {
-    const car = this.cars.get(id);
+    const car = this.get(id);
     if (!car) return;
     car.state = state;
   }

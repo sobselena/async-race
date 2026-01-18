@@ -22,7 +22,7 @@ export class WinnersAPI extends BaseAPI {
   async getWinners(
     page: number,
     limit: number,
-    sort: 'id' | 'wins' | 'time' = 'time',
+    sort: 'id' | 'wins' | 'time' = 'id',
     order: 'asc' | 'desc' = 'asc'
   ): Promise<WinnersResponse> {
     try {
