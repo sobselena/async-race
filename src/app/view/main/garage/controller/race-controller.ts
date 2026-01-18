@@ -1,4 +1,5 @@
 import type { Car, GarageAPI } from '../../../../api/garageAPI';
+import type { WinnersAPI } from '../../../../api/winnersAPI';
 import type { Button } from '../../../../components/button/button-creator';
 import type { PaginationView } from '../../pagination/pagination-view';
 import { carStates } from '../model/car-state';
@@ -7,7 +8,8 @@ import type { CarsListView } from '../view/cars-list/cars-list-view';
 import type { CarFormView } from '../view/form/car-form-view';
 
 export interface RaceControllerProperties {
-  api: GarageAPI;
+  garageAPI: GarageAPI;
+  winnerAPI: WinnersAPI;
   store: CarsStore;
   view: CarsListView;
   updateForm: CarFormView;
@@ -16,7 +18,9 @@ export interface RaceControllerProperties {
   pagination: PaginationView;
 }
 export class RaceController {
-  private api: GarageAPI;
+  private garageAPI: GarageAPI;
+
+  private winnerAPI: WinnersAPI;
 
   private store: CarsStore;
 
@@ -31,7 +35,8 @@ export class RaceController {
   private pagination: PaginationView;
 
   constructor({
-    api,
+    garageAPI,
+    winnerAPI,
     store,
     view,
     updateForm,
@@ -39,13 +44,14 @@ export class RaceController {
     resetAllBtn,
     pagination,
   }: RaceControllerProperties) {
-    this.api = api;
+    this.garageAPI = garageAPI;
     this.store = store;
     this.view = view;
     this.updateForm = updateForm;
     this.startAllBtn = startAllBtn;
     this.resetAllBtn = resetAllBtn;
     this.pagination = pagination;
+    this.winnerAPI = winnerAPI;
   }
 
   async start(id: number) {
@@ -65,13 +71,13 @@ export class RaceController {
       this.updateForm.toggleDisabled(true);
     }
     try {
-      const { velocity, distance } = await this.api.changeEngineState(id, 'started');
+      const { velocity, distance } = await this.garageAPI.changeEngineState(id, 'started');
       if (this.store.get(id)?.timeId !== currentTime) return;
       this.store.setState(id, carStates.MOVING);
       this.view.get(id)?.setState(carStates.MOVING);
 
       this.view.get(id)?.startMove(distance / velocity / 1000);
-      this.api.switchToDriveMode(id).catch(() => {
+      this.garageAPI.switchToDriveMode(id).catch(() => {
         if (this.store.get(id)?.timeId !== currentTime) return;
         if (this.store.get(id)?.state === carStates.MOVING) {
           this.view.get(id)?.stopMove();
@@ -93,7 +99,7 @@ export class RaceController {
     this.store.setState(id, carStates.STOPPED);
     carView.setState(carStates.STOPPED);
     carView.stopMove();
-    await this.api.changeEngineState(id, 'stopped');
+    await this.garageAPI.changeEngineState(id, 'stopped');
     if (this.store.get(id)?.timeId !== currentTime) return;
     carView.resetPosition();
 
@@ -115,7 +121,7 @@ export class RaceController {
   }
 
   async delete(id: number) {
-    await this.api.deleteCar(id);
+    await this.garageAPI.deleteCar(id);
     this.store.remove(id);
     this.view.remove(id);
   }
@@ -127,6 +133,8 @@ export class RaceController {
   }
 
   async startAll() {
+    this.store.resetWinner();
+    this.store.setIsAllStarted(true);
     const cars = this.store.all();
 
     await Promise.all(
@@ -140,5 +148,39 @@ export class RaceController {
     await Promise.all(
       cars.filter(car => car.state !== carStates.IN_GARAGE).map(car => this.stop(car.id))
     );
+    this.store.setIsAllStarted(false);
+  }
+
+  async finish(id: number, currentTime: number) {
+    const isWinner = this.store.setWinner(id);
+    const carView = this.view.get(id);
+    if (!isWinner) {
+      carView?.setState(
+        carStates.FINISHED,
+        `${carStates.FINISHED}(${Math.round(currentTime * 100) / 100}s)`
+      );
+      return;
+    }
+
+    carView?.setState(
+      carStates.WINNER,
+      `${carStates.WINNER}(${Math.round(currentTime * 100) / 100}s)`
+    );
+    let winner;
+    try {
+      winner = await this.winnerAPI.getWinner(id);
+    } catch {
+      winner = null;
+    }
+
+    if (winner) {
+      await this.winnerAPI.updateWinner({
+        id,
+        wins: winner.wins + 1,
+        time: Math.min(winner.time, currentTime),
+      });
+    } else {
+      await this.winnerAPI.createWinner({ id, wins: 1, time: currentTime });
+    }
   }
 }

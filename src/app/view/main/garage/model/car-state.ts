@@ -5,6 +5,7 @@ export const carStates = {
   BROKEN: 'broken',
   FINISHED: 'finished',
   STOPPED: 'resetting',
+  WINNER: 'winner',
 } as const;
 
 export type CarStatesValues = (typeof carStates)[keyof typeof carStates];

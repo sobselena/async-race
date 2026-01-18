@@ -130,7 +130,7 @@ export class WinnersView extends Component {
       preview: this.createPreview(carData.color),
       name: carData.name,
       wins: `${winnerParams.wins}`,
-      time: `${winnerParams.time}`,
+      time: `${Math.round(winnerParams.time * 100) / 100}s`,
     };
   }
 

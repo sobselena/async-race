@@ -9,6 +9,34 @@ export interface CarRuntimeData {
 export class CarsStore {
   private cars = new Map<number, CarRuntimeData>();
 
+  private winnerId: number | null = null;
+
+  private isAllStarted: boolean = false;
+
+  setWinner(id: number) {
+    if (!this.isAllStarted) return false;
+    if (this.winnerId !== null) return false;
+    this.winnerId = id;
+
+    return true;
+  }
+
+  getIsAllStarted() {
+    return this.isAllStarted;
+  }
+
+  setIsAllStarted(isAllStarted: boolean) {
+    this.isAllStarted = isAllStarted;
+  }
+
+  getWinner() {
+    return this.winnerId;
+  }
+
+  resetWinner() {
+    this.winnerId = null;
+  }
+
   init(id: number) {
     this.cars.set(id, { id, state: carStates.IN_GARAGE, timeId: 0 });
   }
@@ -39,5 +67,7 @@ export class CarsStore {
 
   clear() {
     this.cars.clear();
+    this.resetWinner();
+    this.isAllStarted = false;
   }
 }

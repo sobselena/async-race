@@ -1,4 +1,5 @@
 import { GarageAPI } from '../../../../../api/garageAPI';
+import { WinnersAPI } from '../../../../../api/winnersAPI';
 import { Button } from '../../../../../components/button/button-creator';
 import { Component } from '../../../../../utils/Component';
 import { PaginationView } from '../../../pagination/pagination-view';
@@ -12,7 +13,9 @@ import './garage.scss';
 const GARAGE_PAGINATION_LIMIT = 7;
 
 export class GarageView extends Component {
-  private api = new GarageAPI();
+  private garageAPI = new GarageAPI();
+
+  private winnerAPI = new WinnersAPI();
 
   private store = new CarsStore();
 
@@ -38,7 +41,8 @@ export class GarageView extends Component {
     this.pagination = this.createPagination();
     const formWrapper = this.createGarageFormWrapper();
     this.controller = new RaceController({
-      api: this.api,
+      garageAPI: this.garageAPI,
+      winnerAPI: this.winnerAPI,
       store: this.store,
       view: this.carsView,
       updateForm: this.updateForm,
@@ -55,7 +59,7 @@ export class GarageView extends Component {
     this.totalCount = new Component({
       tag: 'span',
       classes: ['garage__total-count'],
-      text: `(${this.api.getTotalCount()})`,
+      text: `(${this.garageAPI.getTotalCount()})`,
     });
     const garageInfoWrapper = new Component({ tag: 'div', classes: ['garage__info-wrapper'] });
     const garageTitle = new Component({ tag: 'h2', text: 'Garage ' }, this.totalCount);
@@ -65,7 +69,7 @@ export class GarageView extends Component {
   }
 
   updateTotalCount() {
-    this.totalCount.setText(`(${this.api.getTotalCount()})`);
+    this.totalCount.setText(`(${this.garageAPI.getTotalCount()})`);
   }
 
   createGarageFormWrapper(): Component {
@@ -93,7 +97,7 @@ export class GarageView extends Component {
   createPagination(): PaginationView {
     return new PaginationView({
       limit: GARAGE_PAGINATION_LIMIT,
-      totalCount: this.api.getTotalCount(),
+      totalCount: this.garageAPI.getTotalCount(),
       onPageChange: () => {
         this.loadCars().catch(console.error);
       },
@@ -130,9 +134,9 @@ export class GarageView extends Component {
   async loadCars() {
     const page = this.pagination.getCurrentPage();
 
-    const cars = await this.api.getCars(page, GARAGE_PAGINATION_LIMIT);
+    const cars = await this.garageAPI.getCars(page, GARAGE_PAGINATION_LIMIT);
     this.updateTotalCount();
-    this.pagination.updateTotalCount(this.api.getTotalCount());
+    this.pagination.updateTotalCount(this.garageAPI.getTotalCount());
 
     this.carsView.clear();
     this.store.clear();
@@ -148,6 +152,9 @@ export class GarageView extends Component {
         },
         onDelete: id => this.deleteCar(id),
         onEdit: id => this.controller.edit(id, car),
+        onFinish: (id, time) => {
+          return this.controller.finish(id, time);
+        },
       });
 
       this.carsView.add(view);
@@ -155,8 +162,8 @@ export class GarageView extends Component {
   }
 
   async createCar(name: string, color: string) {
-    await this.api.createCar({ name, color });
-    this.pagination.updateTotalCount(this.api.getTotalCount());
+    await this.garageAPI.createCar({ name, color });
+    this.pagination.updateTotalCount(this.garageAPI.getTotalCount());
     await this.loadCars();
   }
 
@@ -164,7 +171,7 @@ export class GarageView extends Component {
     const id = this.updateForm.getEditId();
     if (!id) return;
 
-    await this.api.updateCar({ id, name, color });
+    await this.garageAPI.updateCar({ id, name, color });
 
     this.updateForm.setDefaultValues();
     this.updateForm.toggleDisabled(true);
@@ -177,7 +184,7 @@ export class GarageView extends Component {
     await this.controller.delete(id);
     if (this.store.all().length === 0) {
       this.pagination.decreaseCurrentPage();
-      this.pagination.updateTotalCount(this.api.getTotalCount());
+      this.pagination.updateTotalCount(this.garageAPI.getTotalCount());
     }
     await this.loadCars();
     this.updateTotalCount();

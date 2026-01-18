@@ -1,6 +1,7 @@
 import { Button } from '../../../../../components/button/button-creator';
 import { Component } from '../../../../../utils/Component';
 import { carStates, type CarStatesValues } from '../../model/car-state';
+
 import './car-item.scss';
 
 interface CarItemEvents {
@@ -8,6 +9,7 @@ interface CarItemEvents {
   onStop(id: number): Promise<void>;
   onEdit(id: number): void;
   onDelete(id: number): Promise<void>;
+  onFinish(id: number, time: number): Promise<void>;
 }
 
 export class CarItemView extends Component {
@@ -132,8 +134,8 @@ export class CarItemView extends Component {
     return stateWrapper;
   }
 
-  setState(state: CarStatesValues) {
-    this.stateContainer.setText(state);
+  setState(state: CarStatesValues, text?: string) {
+    this.stateContainer.setText(text || state);
     switch (state) {
       case carStates.IN_GARAGE:
         this.startBtn.removeAttribute('disabled');
@@ -142,6 +144,7 @@ export class CarItemView extends Component {
 
       case carStates.MOVING:
       case carStates.FINISHED:
+      case carStates.WINNER:
       case carStates.BROKEN:
         this.startBtn.setAttribute('disabled', '');
         this.stopBtn.removeAttribute('disabled');
@@ -164,7 +167,8 @@ export class CarItemView extends Component {
     imgNode.style.transform = `translateX(${this.getTrackDistance()}px)`;
     const transitionEndCallback = () => {
       imgNode.removeEventListener('transitionend', transitionEndCallback);
-      this.setState(carStates.FINISHED);
+
+      this.events.onFinish(this.id, time).catch(console.error);
     };
     imgNode.addEventListener('transitionend', transitionEndCallback);
   }
