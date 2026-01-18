@@ -13,7 +13,31 @@ import { CarFormView } from '../form/car-form-view';
 import './garage.scss';
 
 const GARAGE_PAGINATION_LIMIT = 7;
-
+const CAR_BRANDS = [
+  'Tesla',
+  'Ford',
+  'BMW',
+  'Audi',
+  'Mercedes',
+  'Toyota',
+  'Honda',
+  'Chevrolet',
+  'Nissan',
+  'Volkswagen',
+];
+const CAR_MODELS = [
+  'Model S',
+  'Mustang',
+  'Civic',
+  'Corolla',
+  'Camaro',
+  'A4',
+  'X5',
+  'Golf',
+  'Altima',
+  'Supra',
+];
+const GENERATE_CARS = 100;
 export class GarageView extends Component {
   private garageAPI = new GarageAPI();
 
@@ -122,6 +146,9 @@ export class GarageView extends Component {
     this.generateCarsBtn = new Button({
       classes: ['garage__button'],
       text: 'Generate 100 cars',
+      onClick: () => {
+        this.generateCars().catch(console.error);
+      },
     });
     this.startRaceBtn = new Button({
       classes: ['garage__button'],
@@ -175,6 +202,43 @@ export class GarageView extends Component {
 
       this.carsView.add(view);
     });
+  }
+
+  async generateCars() {
+    const createdCars = [];
+    for (let i = 0; i < GENERATE_CARS; i += 1) {
+      createdCars.push(
+        this.garageAPI.createCar({ name: this.generateCarName(), color: this.getRandomColor() })
+      );
+    }
+    this.generateCarsBtn.setAttribute('disabled', '');
+
+    await Promise.all(createdCars);
+    this.pagination.updateTotalCount(this.garageAPI.getTotalCount());
+    await this.loadCars();
+    this.generateCarsBtn.removeAttribute('disabled');
+  }
+
+  generateCarName(): string {
+    const brand = this.getRandomItem(CAR_BRANDS);
+    const model = this.getRandomItem(CAR_MODELS);
+
+    return `${brand} ${model}`;
+  }
+
+  getRandomItem(array: string[]): string {
+    return array[Math.floor(Math.random() * array.length)];
+  }
+
+  getRandomColor(): string {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+
+    for (let i = 0; i < 6; i += 1) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+
+    return color;
   }
 
   async createCar(name: string, color: string) {
