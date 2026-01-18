@@ -176,7 +176,6 @@ export class GarageView extends Component {
     if (!id) return;
 
     await this.garageAPI.updateCar({ id, name, color });
-
     this.updateForm.setDefaultValues();
     this.updateForm.toggleDisabled(true);
 

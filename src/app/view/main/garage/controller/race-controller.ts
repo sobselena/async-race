@@ -124,6 +124,7 @@ export class RaceController {
 
   async delete(id: number) {
     await this.garageAPI.deleteCar(id);
+    await this.winnerAPI.deleteWinner(id);
     this.store.remove(id);
     this.view.remove(id);
   }
