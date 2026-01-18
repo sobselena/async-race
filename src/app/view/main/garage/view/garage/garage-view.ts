@@ -2,6 +2,7 @@ import { GarageAPI } from '../../../../../api/garageAPI';
 import { WinnersAPI } from '../../../../../api/winnersAPI';
 import { Button } from '../../../../../components/button/button-creator';
 import { Component } from '../../../../../utils/Component';
+import { paginationStore } from '../../../pagination/pagination-store';
 import { PaginationView } from '../../../pagination/pagination-view';
 import { RaceController } from '../../controller/race-controller';
 import { CarsStore } from '../../model/car-store';
@@ -95,13 +96,16 @@ export class GarageView extends Component {
   }
 
   createPagination(): PaginationView {
-    return new PaginationView({
+    const pagination = new PaginationView({
       limit: GARAGE_PAGINATION_LIMIT,
       totalCount: this.garageAPI.getTotalCount(),
       onPageChange: () => {
+        paginationStore.garagePage = pagination.getCurrentPage();
         this.loadCars().catch(console.error);
       },
     });
+    pagination.setCurrentPage(paginationStore.garagePage);
+    return pagination;
   }
 
   createRaceButtons(): Component {

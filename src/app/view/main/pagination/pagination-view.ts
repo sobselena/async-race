@@ -91,6 +91,11 @@ export class PaginationView extends Component {
     }
   }
 
+  setCurrentPage(page: number) {
+    this.currentPage = page;
+    this.pageNumEl.setText(`${this.currentPage}`);
+  }
+
   getMaxPage(): number {
     return Math.ceil(this.totalCount / this.limit) || 1;
   }

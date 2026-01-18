@@ -2,6 +2,7 @@ import { GarageAPI } from '../../../api/garageAPI';
 import { WinnersAPI, type Winner, type WinnersParams } from '../../../api/winnersAPI';
 import { Button } from '../../../components/button/button-creator';
 import { Component } from '../../../utils/Component';
+import { paginationStore } from '../pagination/pagination-store';
 import { PaginationView } from '../pagination/pagination-view';
 import './winners.scss';
 
@@ -142,13 +143,18 @@ export class WinnersView extends Component {
   }
 
   createPagination(): PaginationView {
-    return new PaginationView({
+    const pagination = new PaginationView({
       limit: WINNERS_PAGINATION_LIMIT,
       totalCount: this.winnersAPI.getTotalCount(),
       onPageChange: () => {
+        paginationStore.winnersPage = pagination.getCurrentPage();
         this.loadWinners().catch(console.error);
       },
     });
+
+    pagination.setCurrentPage(paginationStore.winnersPage);
+
+    return pagination;
   }
 
   async loadWinners(sort: WinnersParams['sort'] = 'time', order: WinnersParams['order'] = 'asc') {
