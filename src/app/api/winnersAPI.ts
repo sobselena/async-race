@@ -22,8 +22,8 @@ export class WinnersAPI extends BaseAPI {
   async getWinners(
     page: number,
     limit: number,
-    sort: 'id' | 'wins' | 'time',
-    order: 'ASC' | 'DESC'
+    sort: 'id' | 'wins' | 'time' = 'time',
+    order: 'asc' | 'desc' = 'asc'
   ): Promise<WinnersResponse> {
     try {
       const response = await fetch(

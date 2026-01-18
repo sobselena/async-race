@@ -7,6 +7,7 @@ import { CarsStore } from '../../model/car-store';
 import { CarItemView } from '../car-item/car-item-view';
 import { CarsListView } from '../cars-list/cars-list-view';
 import { CarFormView } from '../form/car-form-view';
+import './garage.scss';
 
 const GARAGE_PAGINATION_LIMIT = 7;
 
@@ -29,6 +30,8 @@ export class GarageView extends Component {
 
   private resetRaceBtn!: Button;
 
+  private totalCount!: Component;
+
   constructor() {
     super({ tag: 'div', classes: ['garage'] });
 
@@ -43,9 +46,26 @@ export class GarageView extends Component {
       resetAllBtn: this.resetRaceBtn,
       pagination: this.pagination,
     });
-    this.appendChildren([formWrapper, this.carsView, this.pagination]);
+    this.appendChildren([this.createGarageInfoWrapper(), formWrapper, this.carsView]);
 
     this.loadCars().catch(console.error);
+  }
+
+  createGarageInfoWrapper(): Component {
+    this.totalCount = new Component({
+      tag: 'span',
+      classes: ['garage__total-count'],
+      text: `(${this.api.getTotalCount()})`,
+    });
+    const garageInfoWrapper = new Component({ tag: 'div', classes: ['garage__info-wrapper'] });
+    const garageTitle = new Component({ tag: 'h2', text: 'Garage ' }, this.totalCount);
+
+    garageInfoWrapper.appendChildren([garageTitle, this.pagination]);
+    return garageInfoWrapper;
+  }
+
+  updateTotalCount() {
+    this.totalCount.setText(`(${this.api.getTotalCount()})`);
   }
 
   createGarageFormWrapper(): Component {
@@ -111,7 +131,7 @@ export class GarageView extends Component {
     const page = this.pagination.getCurrentPage();
 
     const cars = await this.api.getCars(page, GARAGE_PAGINATION_LIMIT);
-
+    this.updateTotalCount();
     this.pagination.updateTotalCount(this.api.getTotalCount());
 
     this.carsView.clear();
@@ -150,6 +170,7 @@ export class GarageView extends Component {
     this.updateForm.toggleDisabled(true);
 
     await this.loadCars();
+    this.updateTotalCount();
   }
 
   async deleteCar(id: number) {
@@ -159,5 +180,6 @@ export class GarageView extends Component {
       this.pagination.updateTotalCount(this.api.getTotalCount());
     }
     await this.loadCars();
+    this.updateTotalCount();
   }
 }
