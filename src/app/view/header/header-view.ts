@@ -31,7 +31,6 @@ export class HeaderView extends Component {
         { classes: ['header__link'], text: linkParams.name },
         this.headerLinks
       );
-
       linkEl.addListener('click', () => {
         linkParams.callback();
         this.setSelectedItem(pageName);
@@ -51,5 +50,19 @@ export class HeaderView extends Component {
     if (linkComponent instanceof LinkView) {
       linkComponent.setActive('header__link_active');
     }
+  }
+
+  setDisabledItems(isDisabled: boolean) {
+    Object.values(NamePages).forEach(pageName => {
+      const linkComponent = this.headerLinks.get(pageName);
+
+      if (linkComponent instanceof LinkView) {
+        if (isDisabled) {
+          linkComponent.getNode().classList.add('header__link_disabled');
+        } else {
+          linkComponent.getNode().classList.remove('header__link_disabled');
+        }
+      }
+    });
   }
 }

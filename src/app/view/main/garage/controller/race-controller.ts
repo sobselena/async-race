@@ -1,6 +1,7 @@
 import type { Car, GarageAPI } from '../../../../api/garageAPI';
 import type { WinnersAPI } from '../../../../api/winnersAPI';
 import type { Button } from '../../../../components/button/button-creator';
+import type { HeaderView } from '../../../header/header-view';
 import type { PaginationView } from '../../pagination/pagination-view';
 import { carStates } from '../model/car-state';
 import type { CarsStore } from '../model/car-store';
@@ -10,6 +11,7 @@ import type { CarFormView } from '../view/form/car-form-view';
 export interface RaceControllerProperties {
   garageAPI: GarageAPI;
   winnerAPI: WinnersAPI;
+  header: HeaderView;
   store: CarsStore;
   view: CarsListView;
   updateForm: CarFormView;
@@ -34,9 +36,12 @@ export class RaceController {
 
   private pagination: PaginationView;
 
+  private header: HeaderView;
+
   constructor({
     garageAPI,
     winnerAPI,
+    header,
     store,
     view,
     updateForm,
@@ -44,14 +49,15 @@ export class RaceController {
     resetAllBtn,
     pagination,
   }: RaceControllerProperties) {
+    this.winnerAPI = winnerAPI;
     this.garageAPI = garageAPI;
+    this.header = header;
     this.store = store;
     this.view = view;
     this.updateForm = updateForm;
     this.startAllBtn = startAllBtn;
     this.resetAllBtn = resetAllBtn;
     this.pagination = pagination;
-    this.winnerAPI = winnerAPI;
   }
 
   async start(id: number) {
@@ -61,6 +67,7 @@ export class RaceController {
     this.store.setTimeId(id, currentTime);
     this.store.setStartTime(id, currentTime);
     this.startAllBtn.setAttribute('disabled', '');
+    this.header.setDisabledItems(true);
     this.resetAllBtn.removeAttribute('disabled');
     this.view.getCarsMap().forEach(carItem => {
       carItem.disableStateButtons(true);
@@ -113,6 +120,7 @@ export class RaceController {
     }
 
     if (this.store.all().every(({ state }) => state === carStates.IN_GARAGE)) {
+      this.header.setDisabledItems(false);
       this.resetAllBtn.setAttribute('disabled', '');
       this.startAllBtn.removeAttribute('disabled');
       this.pagination.toggleButtons(false);

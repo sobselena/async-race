@@ -2,6 +2,7 @@ import { GarageAPI } from '../../../../../api/garageAPI';
 import { WinnersAPI } from '../../../../../api/winnersAPI';
 import { Button } from '../../../../../components/button/button-creator';
 import { Component } from '../../../../../utils/Component';
+import type { HeaderView } from '../../../../header/header-view';
 import { paginationStore } from '../../../pagination/pagination-store';
 import { PaginationView } from '../../../pagination/pagination-view';
 import { RaceController } from '../../controller/race-controller';
@@ -36,14 +37,17 @@ export class GarageView extends Component {
 
   private totalCount!: Component;
 
-  constructor() {
-    super({ tag: 'div', classes: ['garage'] });
+  private header: HeaderView;
 
+  constructor(header: HeaderView) {
+    super({ tag: 'div', classes: ['garage'] });
+    this.header = header;
     this.pagination = this.createPagination();
     const formWrapper = this.createGarageFormWrapper();
     this.controller = new RaceController({
       garageAPI: this.garageAPI,
       winnerAPI: this.winnerAPI,
+      header: this.header,
       store: this.store,
       view: this.carsView,
       updateForm: this.updateForm,

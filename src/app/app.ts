@@ -30,13 +30,13 @@ export class App {
       {
         path: '',
         callback: () => {
-          this.setContent(new GarageView(), NamePages.GARAGE);
+          this.setContent(new GarageView(this.header), NamePages.GARAGE);
         },
       },
       {
         path: `${NamePages.GARAGE}`,
         callback: () => {
-          this.setContent(new GarageView(), NamePages.GARAGE);
+          this.setContent(new GarageView(this.header), NamePages.GARAGE);
         },
       },
       {
