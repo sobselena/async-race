@@ -1,5 +1,6 @@
 import { GarageAPI } from '../../../api/garageAPI';
-import { WinnersAPI, type Winner } from '../../../api/winnersAPI';
+import { WinnersAPI, type Winner, type WinnersParams } from '../../../api/winnersAPI';
+import { Button } from '../../../components/button/button-creator';
 import { Component } from '../../../utils/Component';
 import { PaginationView } from '../pagination/pagination-view';
 import './winners.scss';
@@ -9,8 +10,8 @@ interface TableProperties {
   number: string;
   preview: Component | string;
   name: string;
-  wins: string;
-  time: string;
+  wins: Button | string;
+  time: Button | string;
 }
 export class WinnersView extends Component {
   private pagination: PaginationView;
@@ -22,6 +23,14 @@ export class WinnersView extends Component {
   private totalCount!: Component;
 
   private tbody!: Component;
+
+  private winsBtn!: Button;
+
+  private timeBtn!: Button;
+
+  private sort: WinnersParams['sort'] = 'time';
+
+  private order: WinnersParams['order'] = 'asc';
 
   constructor() {
     super({ tag: 'div', classes: ['winners'] });
@@ -48,9 +57,49 @@ export class WinnersView extends Component {
     return winnersInfoWrapper;
   }
 
+  createSortBtns() {
+    this.winsBtn = new Button({
+      classes: ['winners__time'],
+      text: `Wins`,
+      onClick: () => {
+        this.toggleSort('wins');
+      },
+    });
+    this.timeBtn = new Button({
+      classes: ['winners__time'],
+      text: `Time ↑`,
+      onClick: () => {
+        this.toggleSort('time');
+      },
+    });
+  }
+
+  private toggleSort(sortField: WinnersParams['sort']) {
+    if (this.sort === sortField) {
+      this.order = this.order === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sort = sortField;
+      this.order = 'asc';
+    }
+
+    this.updateSortButtons();
+    this.loadWinners(this.sort, this.order).catch(console.error);
+  }
+
+  private updateSortButtons() {
+    this.winsBtn.setText(
+      this.sort === 'wins' ? `Wins ${this.order === 'asc' ? '↑' : '↓'}` : 'Wins'
+    );
+
+    this.timeBtn.setText(
+      this.sort === 'time' ? `Time ${this.order === 'asc' ? '↑' : '↓'}` : 'Time'
+    );
+  }
+
   createWinnersTable(): Component {
     const table = new Component({ tag: 'table', classes: ['winners__table'] });
     const thead = new Component({ tag: 'thead' });
+    this.createSortBtns();
     this.createRow({
       tableEl: thead,
       tag: 'th',
@@ -58,8 +107,8 @@ export class WinnersView extends Component {
         number: '№',
         preview: 'Car Preview',
         name: 'Car Name',
-        wins: 'Wins',
-        time: 'Time',
+        wins: this.winsBtn,
+        time: this.timeBtn,
       },
     });
     this.tbody = new Component({ tag: 'tbody' });
@@ -102,9 +151,14 @@ export class WinnersView extends Component {
     });
   }
 
-  async loadWinners() {
+  async loadWinners(sort: WinnersParams['sort'] = 'time', order: WinnersParams['order'] = 'asc') {
     const page = this.pagination.getCurrentPage();
-    const winners = await this.winnersAPI.getWinners(page, WINNERS_PAGINATION_LIMIT);
+    const winners = await this.winnersAPI.getWinners({
+      page,
+      limit: WINNERS_PAGINATION_LIMIT,
+      sort,
+      order,
+    });
     this.tbody.deleteChildren();
     this.updateTotalCount();
     this.pagination.updateTotalCount(this.winnersAPI.getTotalCount());

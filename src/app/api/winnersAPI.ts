@@ -10,6 +10,13 @@ export interface WinnersResponse {
   data: Winner[];
   totalCount: number;
 }
+
+export interface WinnersParams {
+  page: number;
+  limit: number;
+  sort: 'id' | 'wins' | 'time';
+  order: 'asc' | 'desc';
+}
 export class WinnersAPI extends BaseAPI {
   private readonly winnersURL = `${BASIC_URL}/winners`;
 
@@ -19,12 +26,7 @@ export class WinnersAPI extends BaseAPI {
     super();
   }
 
-  async getWinners(
-    page: number,
-    limit: number,
-    sort: 'id' | 'wins' | 'time' = 'id',
-    order: 'asc' | 'desc' = 'asc'
-  ): Promise<WinnersResponse> {
+  async getWinners({ page, limit, sort, order }: WinnersParams): Promise<WinnersResponse> {
     try {
       const response = await fetch(
         `${this.winnersURL}?_page=${page}&_limit=${limit}&_sort=${sort}&_order=${order}`
