@@ -39,6 +39,8 @@ export class GarageView extends Component {
 
   private header: HeaderView;
 
+  private generateCarsBtn!: Button;
+
   constructor(header: HeaderView) {
     super({ tag: 'div', classes: ['garage'] });
     this.header = header;
@@ -50,9 +52,11 @@ export class GarageView extends Component {
       header: this.header,
       store: this.store,
       view: this.carsView,
+      createForm: this.createForm,
       updateForm: this.updateForm,
       startAllBtn: this.startRaceBtn,
       resetAllBtn: this.resetRaceBtn,
+      generateCarsBtn: this.generateCarsBtn,
       pagination: this.pagination,
     });
     this.appendChildren([this.createGarageInfoWrapper(), formWrapper, this.carsView]);
@@ -115,6 +119,10 @@ export class GarageView extends Component {
   createRaceButtons(): Component {
     const wrapper = new Component({ tag: 'div', classes: ['garage__buttons-wrapper'] });
 
+    this.generateCarsBtn = new Button({
+      classes: ['garage__button'],
+      text: 'Generate 100 cars',
+    });
     this.startRaceBtn = new Button({
       classes: ['garage__button'],
       text: 'Start All Races',
@@ -135,7 +143,7 @@ export class GarageView extends Component {
 
     this.resetRaceBtn.setAttribute('disabled', '');
 
-    wrapper.appendChildren([this.startRaceBtn, this.resetRaceBtn]);
+    wrapper.appendChildren([this.generateCarsBtn, this.startRaceBtn, this.resetRaceBtn]);
     return wrapper;
   }
 

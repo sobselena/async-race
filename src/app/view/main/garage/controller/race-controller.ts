@@ -15,8 +15,10 @@ export interface RaceControllerProperties {
   store: CarsStore;
   view: CarsListView;
   updateForm: CarFormView;
+  createForm: CarFormView;
   startAllBtn: Button;
   resetAllBtn: Button;
+  generateCarsBtn: Button;
   pagination: PaginationView;
 }
 export class RaceController {
@@ -34,9 +36,13 @@ export class RaceController {
 
   private resetAllBtn: Button;
 
+  private generateCarsBtn: Button;
+
   private pagination: PaginationView;
 
   private header: HeaderView;
+
+  private createForm: CarFormView;
 
   constructor({
     garageAPI,
@@ -45,6 +51,8 @@ export class RaceController {
     store,
     view,
     updateForm,
+    createForm,
+    generateCarsBtn,
     startAllBtn,
     resetAllBtn,
     pagination,
@@ -55,6 +63,8 @@ export class RaceController {
     this.store = store;
     this.view = view;
     this.updateForm = updateForm;
+    this.createForm = createForm;
+    this.generateCarsBtn = generateCarsBtn;
     this.startAllBtn = startAllBtn;
     this.resetAllBtn = resetAllBtn;
     this.pagination = pagination;
@@ -67,6 +77,8 @@ export class RaceController {
     this.store.setTimeId(id, currentTime);
     this.store.setStartTime(id, currentTime);
     this.startAllBtn.setAttribute('disabled', '');
+    this.generateCarsBtn.setAttribute('disabled', '');
+    this.createForm.toggleDisabled(true);
     this.header.setDisabledItems(true);
     this.resetAllBtn.removeAttribute('disabled');
     this.view.getCarsMap().forEach(carItem => {
@@ -123,6 +135,8 @@ export class RaceController {
       this.header.setDisabledItems(false);
       this.resetAllBtn.setAttribute('disabled', '');
       this.startAllBtn.removeAttribute('disabled');
+      this.generateCarsBtn.removeAttribute('disabled');
+      this.createForm.toggleDisabled(false);
       this.pagination.toggleButtons(false);
       this.view.getCarsMap().forEach(carItem => {
         carItem.disableStateButtons(false);
