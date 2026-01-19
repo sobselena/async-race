@@ -1,4 +1,4 @@
-.car__state-wrapper {
+.car__header {
   display: flex;
   align-items: center;
 }
@@ -22,8 +22,10 @@
 }
 
 .car__track {
+  display: flex;
+  align-items: center;
+  padding: 0 1.2rem;
   width: 100%;
-  padding: 1.2rem;
   position: relative;
   background: url('../../../../../assets/images/flag.png') no-repeat;
   background-size: 4.8rem;

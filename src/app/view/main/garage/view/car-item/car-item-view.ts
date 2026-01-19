@@ -41,27 +41,28 @@ export class CarItemView extends Component {
 
   private render(name: string, color: string) {
     this.stateContainer = this.createStateContainer();
+    const carHeader = this.createCarHeader(name);
+    const carBody = this.createCarBody(color);
+
+    this.appendChildren([carHeader, carBody]);
+  }
+
+  createCarBody(color: string): Component {
+    const carBody = new Component({ tag: 'div', classes: ['car__body'] });
     this.startBtn = this.createStartButton();
     this.stopBtn = this.createStopButton();
     this.stopBtn.setAttribute('disabled', '');
     this.track = this.createTrackLayout(color);
-    this.editBtn = this.createEditButton();
-    this.deleteBtn = this.createDeleteButton();
+    carBody.appendChildren([this.startBtn, this.stopBtn, this.track]);
 
-    const carName = new Component({ tag: 'h3', text: name });
-    this.appendChildren([
-      this.createCarStateWrapper(carName),
-      this.startBtn,
-      this.stopBtn,
-      this.track,
-    ]);
+    return carBody;
   }
 
   createTrackLayout(color: string) {
     const track = new Component({ tag: 'div', classes: ['car__track'] });
 
     this.imgWrapper = this.createCarImage(color);
-    track.appendChildren([this.startBtn, this.stopBtn, this.imgWrapper]);
+    track.appendChildren([this.imgWrapper]);
     return track;
   }
 
@@ -131,8 +132,12 @@ export class CarItemView extends Component {
     return imageWrapper;
   }
 
-  private createCarStateWrapper(carName: Component): Component {
-    const stateWrapper = new Component({ tag: 'div', classes: ['car__state-wrapper'] });
+  private createCarHeader(name: string): Component {
+    this.editBtn = this.createEditButton();
+    this.deleteBtn = this.createDeleteButton();
+
+    const carName = new Component({ tag: 'h3', text: name });
+    const stateWrapper = new Component({ tag: 'div', classes: ['car__header'] });
     stateWrapper.appendChildren([this.editBtn, this.deleteBtn, carName, this.stateContainer]);
     return stateWrapper;
   }
