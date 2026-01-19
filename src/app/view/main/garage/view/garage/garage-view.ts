@@ -265,6 +265,7 @@ export class GarageView extends Component {
       this.pagination.decreaseCurrentPage();
       this.pagination.updateTotalCount(this.garageAPI.getTotalCount());
     }
+
     await this.loadCars();
     this.updateTotalCount();
   }

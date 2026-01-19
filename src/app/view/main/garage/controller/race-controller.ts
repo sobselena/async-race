@@ -87,9 +87,7 @@ export class RaceController {
     this.pagination.toggleButtons(true);
     this.store.setState(id, carStates.STARTING);
     this.view.get(id)?.setState(carStates.STARTING);
-    if (id === this.updateForm.getEditId()) {
-      this.updateForm.toggleDisabled(true);
-    }
+    this.updateForm.toggleDisabled(true);
     try {
       const { velocity, distance } = await this.garageAPI.changeEngineState(id, 'started');
       if (this.store.get(id)?.timeId !== currentTime) return;
@@ -127,12 +125,9 @@ export class RaceController {
     this.store.setState(id, carStates.IN_GARAGE);
     carView.setState(carStates.IN_GARAGE);
 
-    if (id === this.updateForm.getEditId()) {
-      this.updateForm.toggleDisabled(false);
-    }
-
     if (this.store.all().every(({ state }) => state === carStates.IN_GARAGE)) {
       this.header.setDisabledItems(false);
+      this.updateForm.toggleDisabled(false);
       this.resetAllBtn.setAttribute('disabled', '');
       this.startAllBtn.removeAttribute('disabled');
       this.generateCarsBtn.removeAttribute('disabled');
@@ -146,7 +141,13 @@ export class RaceController {
 
   async delete(id: number) {
     await this.garageAPI.deleteCar(id);
-    await this.winnerAPI.deleteWinner(id);
+    try {
+      await this.winnerAPI.deleteWinner(id);
+    } catch (error) {
+      if (!(error as Error).message.includes('404')) {
+        throw error;
+      }
+    }
     this.store.remove(id);
     this.view.remove(id);
   }

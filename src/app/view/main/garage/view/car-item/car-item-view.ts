@@ -89,7 +89,6 @@ export class CarItemView extends Component {
   private createStartButton(): Button {
     return new Button({
       classes: ['car__button', 'car__button_start'],
-      text: 'Start',
       onClick: () => {
         this.events.onStart(this.id).catch(console.error);
       },
@@ -99,7 +98,7 @@ export class CarItemView extends Component {
   private createStopButton(): Button {
     return new Button({
       classes: ['car__button', 'car__button_stop'],
-      text: 'Stop',
+
       onClick: () => {
         this.events.onStop(this.id).catch(console.error);
       },
@@ -109,7 +108,6 @@ export class CarItemView extends Component {
   private createEditButton(): Button {
     return new Button({
       classes: ['car__button', 'car__button_edit'],
-      text: 'Edit',
       onClick: () => {
         this.events.onEdit(this.id);
       },
@@ -119,14 +117,13 @@ export class CarItemView extends Component {
   private createDeleteButton(): Button {
     return new Button({
       classes: ['car__button', 'car__button_delete'],
-      text: 'Delete',
       onClick: () => {
         this.events.onDelete(this.id).catch(console.error);
       },
     });
   }
 
-  private createCarImage(color: string = '#FFE100'): Component {
+  private createCarImage(color: string = '#ffff'): Component {
     const imageWrapper = new Component({ tag: 'div', classes: ['car__image-wrapper'] });
     imageWrapper.getNode().innerHTML = svgCarGenerator.generateSVG({ color });
     return imageWrapper;
