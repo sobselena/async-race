@@ -46,7 +46,6 @@
 .car__button {
   height: 4.2rem;
   width: 4.2rem;
-  border: 2px solid #222;
   border-radius: 50%;
   transition: all 0.3s;
 }
@@ -58,7 +57,7 @@
   opacity: 0.5;
   scale: 0.95;
 }
-@mixin button-icon($size: 2.6rem) {
+@mixin button-icon($size: 4.2rem) {
   background-position: center center;
   background-size: $size;
 }
