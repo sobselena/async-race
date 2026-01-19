@@ -133,7 +133,7 @@ export class CarItemView extends Component {
     this.editBtn = this.createEditButton();
     this.deleteBtn = this.createDeleteButton();
 
-    const carName = new Component({ tag: 'h3', text: name });
+    const carName = new Component({ tag: 'h3', text: name, classes: ['car__name'] });
     const stateWrapper = new Component({ tag: 'div', classes: ['car__header'] });
     stateWrapper.appendChildren([this.editBtn, this.deleteBtn, carName, this.stateContainer]);
     return stateWrapper;

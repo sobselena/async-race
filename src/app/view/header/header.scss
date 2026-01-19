@@ -1,21 +1,9 @@
+.header__title {
+  font-size: 4.6rem;
+}
+
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.header__link {
-  opacity: 0.5;
-  cursor: pointer;
-}
-
-.header__link_active {
-  pointer-events: all;
-  opacity: 1;
-}
-
-.header__link.header__link.header__link_disabled {
-  pointer-events: none;
-  color: brown;
-  opacity: 1;
 }

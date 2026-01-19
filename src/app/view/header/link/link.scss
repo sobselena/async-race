@@ -3,6 +3,33 @@
   gap: 1.2rem;
 }
 
+.header__link {
+  color: #fff;
+  border: 3px solid #222;
+  background-color: #222;
+  padding: 0.6rem 1.8rem;
+  border-radius: 0.8rem;
+  font-size: 1.8rem;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.header__link:hover {
+  text-shadow: 0 0 2rem #fff;
+}
 .header__link_active {
-  color: green;
+  color: #222;
+  background-color: #fff;
+  box-shadow: 0.4rem 0.4rem 0rem rgba($color: #222, $alpha: 1);
+  pointer-events: all;
+
+  cursor: auto;
+}
+
+.header__link.header__link_disabled {
+  pointer-events: none;
+  color: #fff;
+  background-color: brown;
+  box-shadow: 0.4rem 0.4rem 0rem rgba($color: brown, $alpha: 1);
+  cursor: not-allowed;
 }

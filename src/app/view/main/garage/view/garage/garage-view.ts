@@ -95,7 +95,10 @@ export class GarageView extends Component {
       text: `(${this.garageAPI.getTotalCount()})`,
     });
     const garageInfoWrapper = new Component({ tag: 'div', classes: ['garage__info-wrapper'] });
-    const garageTitle = new Component({ tag: 'h2', text: 'Garage ' }, this.totalCount);
+    const garageTitle = new Component(
+      { tag: 'h2', text: 'Garage ', classes: ['garage__title'] },
+      this.totalCount
+    );
 
     garageInfoWrapper.appendChildren([garageTitle, this.pagination]);
     return garageInfoWrapper;

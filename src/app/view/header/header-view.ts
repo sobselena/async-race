@@ -18,13 +18,17 @@ export class HeaderView extends Component {
   }
 
   createHeader(router: Router): void {
-    const h1El = new Component({ tag: 'h1', text: 'Async Race' });
+    const h1El = new Component({ tag: 'h1', text: 'Async Race', classes: ['header__title'] });
     const navEl = new Component({ tag: 'nav', classes: ['header__nav'] });
 
     Object.values(NamePages).forEach(pageName => {
       const linkParams = {
         name: pageName,
-        callback: () => router.navigate(pageName),
+        callback: () => {
+          if (pageName !== router.parseUrl(router.getUrl()).path) {
+            router.navigate(pageName);
+          }
+        },
       };
 
       const linkEl = new LinkView(

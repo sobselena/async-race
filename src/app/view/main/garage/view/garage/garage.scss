@@ -1,5 +1,32 @@
+.garage__title {
+  font-size: 3.6rem;
+}
 .garage__info-wrapper {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+.garage__buttons-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+.garage__button {
+  background-color: #222;
+  color: #fff;
+  font-size: 2rem;
+  padding: 0.6rem 1.8rem;
+  border-radius: 0.6rem;
+  transition: all 0.3s;
+}
+.garage__button[disabled] {
+  opacity: 0.5;
+  scale: 0.95;
+  cursor: auto;
+}
+.garage__button:hover {
+  transform: translateY(-4px);
+}
+.garage__button[disabled]:hover {
+  transform: translateY(0);
 }
