@@ -2,6 +2,7 @@ import { GarageAPI } from '../../../api/garageAPI';
 import { WinnersAPI, type Winner, type WinnersParams } from '../../../api/winnersAPI';
 import { Button } from '../../../components/button/button-creator';
 import { Component } from '../../../utils/Component';
+import { svgCarGenerator } from '../garage/view/car-item/carSVG';
 import { paginationStore } from '../pagination/pagination-store';
 import { PaginationView } from '../pagination/pagination-view';
 import './winners.scss';
@@ -196,7 +197,7 @@ export class WinnersView extends Component {
 
   createPreview(color: string): Component {
     const imgWrapper = new Component({ tag: 'div', classes: ['winners__preview'] });
-    imgWrapper.getNode().style.backgroundColor = color;
+    imgWrapper.getNode().innerHTML = svgCarGenerator.generateSVG({ color });
     return imgWrapper;
   }
 

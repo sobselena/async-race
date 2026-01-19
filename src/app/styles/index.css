@@ -9,11 +9,12 @@
 html {
   font-size: 62.5%;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 body {
   font-size: 1.6rem;
+  background-color: rgb(255, 67, 78);
 }
 
 /*# sourceMappingURL=index.css.map */

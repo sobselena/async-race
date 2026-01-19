@@ -3,6 +3,7 @@ import { Component } from '../../../../../utils/Component';
 import { carStates, type CarStatesValues } from '../../model/car-state';
 
 import './car-item.scss';
+import { svgCarGenerator } from './carSVG';
 
 interface CarItemEvents {
   onStart(id: number): Promise<void>;
@@ -65,10 +66,15 @@ export class CarItemView extends Component {
   }
 
   getTrackDistance(): number {
-    const trackWidth = this.track.getNode().clientWidth;
-    const carWidth = this.imgWrapper.getNode().clientWidth;
+    const trackNode = this.track.getNode();
+    const style = getComputedStyle(trackNode);
+    const paddingLeft = parseFloat(style.paddingLeft);
+    const paddingRight = parseFloat(style.paddingRight);
 
-    return trackWidth - carWidth;
+    const trackContentWidth = trackNode.clientWidth - paddingLeft - paddingRight;
+    const carWidth = this.imgWrapper.getNode().getBoundingClientRect().width;
+
+    return trackContentWidth - carWidth;
   }
 
   private createStateContainer(): Component {
@@ -119,12 +125,9 @@ export class CarItemView extends Component {
     });
   }
 
-  private createCarImage(color: string): Component {
+  private createCarImage(color: string = '#FFE100'): Component {
     const imageWrapper = new Component({ tag: 'div', classes: ['car__image-wrapper'] });
-    const img = new Component({ tag: 'div', classes: ['car__image'] });
-    imageWrapper.appendChildren([img]);
-    img.getNode().style.backgroundColor = color;
-
+    imageWrapper.getNode().innerHTML = svgCarGenerator.generateSVG({ color });
     return imageWrapper;
   }
 
@@ -162,7 +165,7 @@ export class CarItemView extends Component {
   }
 
   startMove(time: number) {
-    const imgNode = this.imgWrapper.getAllChildren()[0].getNode();
+    const imgNode = this.imgWrapper.getNode();
     imgNode.style.transition = `transform ${time}s linear`;
     imgNode.style.transform = `translateX(${this.getTrackDistance()}px)`;
     const transitionEndCallback = () => {
@@ -174,14 +177,14 @@ export class CarItemView extends Component {
   }
 
   stopMove() {
-    const imgNode = this.imgWrapper.getAllChildren()[0].getNode();
+    const imgNode = this.imgWrapper.getNode();
     const matrix = new DOMMatrixReadOnly(getComputedStyle(imgNode).transform);
     imgNode.style.transition = '';
     imgNode.style.transform = `translateX(${matrix.m41}px)`;
   }
 
   resetPosition() {
-    const imgNode = this.imgWrapper.getAllChildren()[0].getNode();
+    const imgNode = this.imgWrapper.getNode();
     imgNode.style.transition = '';
     imgNode.style.transform = 'translateX(0)';
   }
