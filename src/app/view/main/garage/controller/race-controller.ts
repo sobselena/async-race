@@ -86,13 +86,13 @@ export class RaceController {
     });
     this.pagination.toggleButtons(true);
     this.store.setState(id, carStates.STARTING);
-    this.view.get(id)?.setState(carStates.STARTING);
+    this.view.get(id)?.setState(carStates.STARTING, `${carStates.STARTING}🚩`);
     this.updateForm.toggleDisabled(true);
     try {
       const { velocity, distance } = await this.garageAPI.changeEngineState(id, 'started');
       if (this.store.get(id)?.timeId !== currentTime) return;
       this.store.setState(id, carStates.MOVING);
-      this.view.get(id)?.setState(carStates.MOVING);
+      this.view.get(id)?.setState(carStates.MOVING, `ᯓ${carStates.MOVING}`);
 
       this.view.get(id)?.startMove(distance / velocity / 1000);
       this.garageAPI.switchToDriveMode(id).catch(() => {
@@ -100,7 +100,7 @@ export class RaceController {
         if (this.store.get(id)?.state === carStates.MOVING) {
           this.view.get(id)?.stopMove();
           this.store.setState(id, carStates.BROKEN);
-          this.view.get(id)?.setState(carStates.BROKEN);
+          this.view.get(id)?.setState(carStates.BROKEN, `${carStates.BROKEN}💥`);
         }
       });
     } catch (error) {
@@ -116,14 +116,14 @@ export class RaceController {
     this.store.setTimeId(id, currentTime);
     this.store.setStartTime(id, 0);
     this.store.setState(id, carStates.STOPPED);
-    carView.setState(carStates.STOPPED);
+    carView.setState(carStates.STOPPED, `${carStates.STOPPED}↩`);
     carView.stopMove();
     await this.garageAPI.changeEngineState(id, 'stopped');
     if (this.store.get(id)?.timeId !== currentTime) return;
     carView.resetPosition();
 
     this.store.setState(id, carStates.IN_GARAGE);
-    carView.setState(carStates.IN_GARAGE);
+    carView.setState(carStates.IN_GARAGE, `${carStates.IN_GARAGE} 🧰`);
 
     if (this.store.all().every(({ state }) => state === carStates.IN_GARAGE)) {
       this.header.setDisabledItems(false);
@@ -181,11 +181,11 @@ export class RaceController {
     const carView = this.view.get(id);
     const raceTime = Number(((Date.now() - this.store.getStartTime(id)) / 1000).toFixed(2));
     if (!isWinner) {
-      carView?.setState(carStates.FINISHED, `${carStates.FINISHED}(${raceTime}s)`);
+      carView?.setState(carStates.FINISHED, `${carStates.FINISHED}(${raceTime}s)🎉`);
       return;
     }
 
-    carView?.setState(carStates.WINNER, `${carStates.WINNER}(${raceTime}s)`);
+    carView?.setState(carStates.WINNER, `${carStates.WINNER}(${raceTime}s)⭐`);
     let winner;
     try {
       winner = await this.winnerAPI.getWinner(id);

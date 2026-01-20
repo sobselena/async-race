@@ -1,15 +1,20 @@
 .garage {
   width: min(140rem, calc(100vw - 4rem));
-  margin: 0 auto;
+  margin: 0 auto 0.6rem auto;
 }
 
 .garage__title {
   font-size: 3.6rem;
+  text-transform: uppercase;
+}
+.garage__total-count {
+  margin-left: 0.6rem;
 }
 .garage__info-wrapper {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 1.2rem;
 }
 .garage__buttons-wrapper {
   display: flex;
@@ -35,4 +40,9 @@
 }
 .garage__button[disabled]:hover {
   transform: translateY(0);
+}
+.garage__cars {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }

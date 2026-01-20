@@ -7,7 +7,6 @@
   margin-left: auto;
   font-size: 1.7rem;
 }
-
 .car__body {
   display: flex;
   align-items: center;
@@ -30,9 +29,18 @@
   padding: 0 1.2rem 0 2.2rem;
   flex-grow: 1;
   position: relative;
-  background: url('../../../../../assets/images/flag.png') no-repeat;
-  background-size: 5.1rem;
-  background-position: calc(100% - 8.8rem);
+}
+.car__track::after {
+  content: '';
+  right: 8.8rem;
+  top: 50%;
+  z-index: 100;
+  height: 5.1rem;
+  width: 5.1rem;
+  transform: translateY(-50%);
+  position: absolute;
+  background: url(/app/assets/images/flag.png) no-repeat center center;
+  background-size: cover;
 }
 .car__track::before {
   content: '';
@@ -44,16 +52,6 @@
   background-size: 98% 44rem;
   z-index: -100;
   transform: skewX(-45deg);
-}
-.car__flag {
-  position: absolute;
-  right: 2rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3.2rem;
-  height: 3.2rem;
-  background: url('../../../assets/images/flag.png') no-repeat center center;
-  background-size: cover;
 }
 
 .car__button {
@@ -96,6 +94,6 @@
 }
 
 .car__name {
-  font-size: 2rem;
+  font-size: 2.15rem;
   margin-left: 1.2rem;
 }

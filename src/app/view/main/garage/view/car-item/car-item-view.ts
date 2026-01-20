@@ -32,6 +32,8 @@ export class CarItemView extends Component {
 
   private events: CarItemEvents;
 
+  private isTransitionEndAttached: boolean = false;
+
   constructor(id: number, name: string, color: string, events: CarItemEvents) {
     super({ tag: 'div', classes: ['car'] });
     this.id = id;
@@ -86,7 +88,7 @@ export class CarItemView extends Component {
     return new Component({
       tag: 'div',
       classes: ['car__state'],
-      text: carStates.IN_GARAGE,
+      text: `${carStates.IN_GARAGE} 🧰`,
     });
   }
 
@@ -170,20 +172,32 @@ export class CarItemView extends Component {
     }
   }
 
+  private handleTransitionEnd = () => {
+    if (this.isTransitionEndAttached) {
+      this.isTransitionEndAttached = false;
+      const imgNode = this.imgWrapper.getNode();
+      imgNode.removeEventListener('transitionend', this.handleTransitionEnd);
+      this.events.onFinish(this.id).catch(console.error);
+    }
+  };
+
   startMove(time: number) {
     const imgNode = this.imgWrapper.getNode();
+
+    imgNode.removeEventListener('transitionend', this.handleTransitionEnd);
+
     imgNode.style.transition = `transform ${time}s linear`;
     imgNode.style.transform = `translateX(${this.getTrackDistance()}px)`;
-    const transitionEndCallback = () => {
-      imgNode.removeEventListener('transitionend', transitionEndCallback);
 
-      this.events.onFinish(this.id).catch(console.error);
-    };
-    imgNode.addEventListener('transitionend', transitionEndCallback);
+    this.isTransitionEndAttached = true;
+    imgNode.addEventListener('transitionend', this.handleTransitionEnd);
   }
 
   stopMove() {
     const imgNode = this.imgWrapper.getNode();
+    imgNode.removeEventListener('transitionend', this.handleTransitionEnd);
+    this.isTransitionEndAttached = false;
+
     const matrix = new DOMMatrixReadOnly(getComputedStyle(imgNode).transform);
     imgNode.style.transition = '';
     imgNode.style.transform = `translateX(${matrix.m41}px)`;

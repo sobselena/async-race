@@ -1,5 +1,8 @@
 .header__title {
   font-size: 4.6rem;
+  text-transform: uppercase;
+  font-style: italic;
+  color: brown;
 }
 
 .header {
@@ -8,4 +11,5 @@
   justify-content: space-between;
   width: min(140rem, calc(100vw - 4rem));
   margin: 0 auto;
+  margin: 2rem auto 1rem auto;
 }
