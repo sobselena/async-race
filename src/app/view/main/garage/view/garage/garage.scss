@@ -1,3 +1,8 @@
+.garage {
+  width: min(140rem, calc(100vw - 4rem));
+  margin: 0 auto;
+}
+
 .garage__title {
   font-size: 3.6rem;
 }
@@ -16,8 +21,9 @@
   color: #fff;
   font-size: 2rem;
   padding: 0.6rem 1.8rem;
-  border-radius: 0.6rem;
+  border-radius: 0.8rem;
   transition: all 0.3s;
+  box-shadow: 0rem 0rem 1rem rgba($color: #222, $alpha: 0.2);
 }
 .garage__button[disabled] {
   opacity: 0.5;

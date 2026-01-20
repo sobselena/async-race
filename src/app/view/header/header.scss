@@ -6,4 +6,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: min(140rem, calc(100vw - 4rem));
+  margin: 0 auto;
 }

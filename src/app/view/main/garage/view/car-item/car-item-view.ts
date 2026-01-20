@@ -68,12 +68,16 @@ export class CarItemView extends Component {
 
   getTrackDistance(): number {
     const trackNode = this.track.getNode();
-    const style = getComputedStyle(trackNode);
-    const paddingLeft = parseFloat(style.paddingLeft);
-    const paddingRight = parseFloat(style.paddingRight);
+    const carNode = this.imgWrapper.getNode();
+    const trackStyle = getComputedStyle(trackNode);
+    const carStyle = getComputedStyle(carNode);
+    const paddingLeft = parseFloat(trackStyle.paddingLeft);
+    const paddingRight = parseFloat(trackStyle.paddingRight);
+    const marginLeft = parseFloat(carStyle.marginLeft);
+    const marginRight = parseFloat(carStyle.marginRight);
 
     const trackContentWidth = trackNode.clientWidth - paddingLeft - paddingRight;
-    const carWidth = this.imgWrapper.getNode().getBoundingClientRect().width;
+    const carWidth = carNode.clientWidth + marginLeft + marginRight;
 
     return trackContentWidth - carWidth;
   }

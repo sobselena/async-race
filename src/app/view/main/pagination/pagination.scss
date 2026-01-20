@@ -1,4 +1,31 @@
 .pagination {
   display: flex;
   align-items: center;
+  gap: 1.2rem;
+}
+
+.pagination__button {
+  font-size: 2.2rem;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.pagination__button::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  bottom: 0%;
+  height: 2px;
+  background-color: #222;
+  transition: all 0.3s;
+  opacity: 0;
+}
+.pagination__button:hover:before {
+  opacity: 1;
+}
+.pagination__button[disabled] {
+  transform: scale(0.92);
+}
+.pagination__current-page {
+  font-size: 2.3rem;
 }
