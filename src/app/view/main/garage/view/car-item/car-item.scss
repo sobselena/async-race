@@ -1,3 +1,4 @@
+@use '../../../../../styles/abstracts/mixins';
 .car__header {
   display: flex;
   align-items: center;
@@ -69,28 +70,25 @@
   scale: 0.95;
   cursor: auto;
 }
-@mixin button-icon($size: 4.2rem) {
-  background-position: center center;
-  background-size: $size;
-}
+
 .car__button_start {
   background: url('../../../../../assets/images/start.png') no-repeat;
-  @include button-icon();
+  @include mixins.button-icon();
 }
 
 .car__button_stop {
   margin-left: 0.5rem;
   background: url('../../../../../assets/images/stop.png') no-repeat;
-  @include button-icon();
+  @include mixins.button-icon();
 }
 .car__button_edit {
   background: url('../../../../../assets/images/edit.png') no-repeat;
-  @include button-icon();
+  @include mixins.button-icon();
 }
 .car__button_delete {
   margin-left: 0.5rem;
   background: url('../../../../../assets/images/delete.png') no-repeat;
-  @include button-icon();
+  @include mixins.button-icon();
 }
 
 .car__name {

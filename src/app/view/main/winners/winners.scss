@@ -1,14 +1,48 @@
+th {
+  font-size: 2.6rem;
+  text-align: center;
+  background-color: #222;
+  color: #fff;
+  padding: 0.6rem 0rem;
+}
+
+td {
+  font-size: 2.6rem;
+  text-align: center;
+}
+tbody tr {
+  border-bottom: 3px solid #222;
+}
+.winners {
+  width: min(140rem, calc(100vw - 4rem));
+  margin: 0 auto 0.6rem auto;
+}
+
 .winners__info-wrapper {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 1.4rem;
 }
 
 .winners__table {
   margin: 0 auto;
-  width: 60rem;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0.5rem 1rem;
 }
 
 .winners__preview {
   display: inline-block;
+}
+.winners__title {
+  font-size: 3.6rem;
+  text-transform: uppercase;
+}
+
+.winners__button {
+  font-size: 2.6rem;
+  color: #fff;
+  width: 100%;
+  height: 100%;
 }

@@ -1,0 +1,4 @@
+@mixin button-icon($size: 4.2rem) {
+  background-position: center center;
+  background-size: $size;
+}

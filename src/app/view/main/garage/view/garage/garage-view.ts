@@ -10,6 +10,7 @@ import { CarsStore } from '../../model/car-store';
 import { CarItemView } from '../car-item/car-item-view';
 import { CarsListView } from '../cars-list/cars-list-view';
 import { CarFormView } from '../form/car-form-view';
+import { formStore } from '../form/form-store';
 import './garage.scss';
 
 const GARAGE_PAGINATION_LIMIT = 7;
@@ -117,17 +118,27 @@ export class GarageView extends Component {
         this.createCar(name, color).catch(console.error);
       },
     });
-
     this.updateForm = new CarFormView({
       classes: ['garage__form', 'garage__form_update'],
       submitBtnText: 'Update',
-      isDisabled: true,
+      id: formStore.editId,
+      isDisabled: !formStore.editId,
       onSubmit: (name, color) => {
         this.updateCar(name, color).catch(console.error);
       },
     });
+    this.saveData();
     garageFormWrapper.appendChildren([this.createForm, this.createRaceButtons(), this.updateForm]);
     return garageFormWrapper;
+  }
+
+  saveData() {
+    this.createForm.setTextInput(formStore.createInputText);
+    this.createForm.setColorInput(formStore.createInputColor);
+    this.updateForm.setTextInput(formStore.updateInputText);
+    this.updateForm.setColorInput(formStore.updateInputColor);
+    this.createForm.saveData('create');
+    this.updateForm.saveData('update');
   }
 
   createPagination(): PaginationView {

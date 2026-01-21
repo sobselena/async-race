@@ -7,6 +7,7 @@ import { carStates } from '../model/car-state';
 import type { CarsStore } from '../model/car-store';
 import type { CarsListView } from '../view/cars-list/cars-list-view';
 import type { CarFormView } from '../view/form/car-form-view';
+import { formStore } from '../view/form/form-store';
 
 export interface RaceControllerProperties {
   garageAPI: GarageAPI;
@@ -154,6 +155,9 @@ export class RaceController {
 
   edit(id: number, car: Car) {
     this.updateForm.setEditId(id);
+    formStore.editId = id;
+    formStore.updateInputColor = car.color;
+    formStore.updateInputText = car.name;
     this.updateForm.setCarValues(car);
     this.updateForm.toggleDisabled(false);
   }

@@ -3,6 +3,7 @@ import { Button } from '../../../../../components/button/button-creator';
 import { InputField } from '../../../../../components/input-field/input-field-creator';
 import { Component } from '../../../../../utils/Component';
 import './car-form.scss';
+import { formStore } from './form-store';
 
 export interface CarFormProperties {
   onSubmit: (name: string, color: string) => void;
@@ -37,7 +38,6 @@ export class CarFormView extends Component {
 
   createFormLayout(submitBtnText: string) {
     this.textInput = new InputField({ classes: ['garage__text-input'], type: 'text' });
-
     this.colorInput = new InputField({
       classes: ['garage__color-input'],
       type: 'color',
@@ -55,8 +55,10 @@ export class CarFormView extends Component {
     this.addListener('submit', (event: Event) => {
       event.preventDefault();
       const name = this.textInput.getValue().trim();
-      this.onSubmit(name, this.colorInput.getValue());
-      this.textInput.setDeffaultValue();
+      if (name !== '') {
+        this.onSubmit(name, this.colorInput.getValue());
+        this.textInput.setDeffaultValue();
+      }
     });
   }
 
@@ -88,5 +90,31 @@ export class CarFormView extends Component {
 
   getEditId() {
     return this.editId;
+  }
+
+  setTextInput(value: string) {
+    (this.textInput.getNode() as HTMLInputElement).value = value;
+  }
+
+  setColorInput(value: string) {
+    (this.colorInput.getNode() as HTMLInputElement).value = value;
+  }
+
+  saveData(type: 'update' | 'create') {
+    this.textInput.addListener('input', () => {
+      if (type === 'create') {
+        formStore.createInputText = this.textInput.getValue();
+      } else {
+        formStore.updateInputText = this.textInput.getValue();
+      }
+    });
+
+    this.colorInput.addListener('input', () => {
+      if (type === 'create') {
+        formStore.createInputColor = this.colorInput.getValue();
+      } else {
+        formStore.updateInputColor = this.colorInput.getValue();
+      }
+    });
   }
 }

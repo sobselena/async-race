@@ -53,7 +53,10 @@ export class WinnersView extends Component {
       classes: ['winners__total-count'],
       text: `(${this.winnersAPI.getTotalCount()})`,
     });
-    const winnersTitle = new Component({ tag: 'h2', text: 'Winners ' }, this.totalCount);
+    const winnersTitle = new Component(
+      { tag: 'h2', text: 'Winners ', classes: ['winners__title'] },
+      this.totalCount
+    );
 
     winnersInfoWrapper.appendChildren([winnersTitle, this.pagination]);
     return winnersInfoWrapper;
@@ -61,14 +64,14 @@ export class WinnersView extends Component {
 
   createSortBtns() {
     this.winsBtn = new Button({
-      classes: ['winners__time'],
+      classes: ['winners__button', 'winners__button_wins'],
       text: `Wins`,
       onClick: () => {
         this.toggleSort('wins');
       },
     });
     this.timeBtn = new Button({
-      classes: ['winners__time'],
+      classes: ['winners__button', 'winners__button_time'],
       text: `Time ↑`,
       onClick: () => {
         this.toggleSort('time');

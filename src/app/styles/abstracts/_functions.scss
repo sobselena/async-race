@@ -1,0 +1,11 @@
+@function calculateSize($min-size, $max-size, $min-screen, $max-screen) {
+  $size-diff: $max-size - $min-size;
+  $screen-diff: $max-screen - $min-screen;
+
+  $size: clamp(
+    #{$min-size},
+    calc(#{$min-size} + (100vw - #{$min-screen}) / #{$screen-diff} * #{$size-diff}),
+    #{$max-size}
+  );
+  @return $size;
+}
